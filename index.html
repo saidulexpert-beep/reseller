@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAIL SHOP</title>
+    <title>Dollar Exchange</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* === NEW: CSS Variables for Premium Theme === */
         :root {
             --bg-color: #f4f7fa;
             --card-bg-color: #ffffff;
@@ -20,8 +18,6 @@
             --accent-start: #4f46e5;
             --accent-end: #7c3aed;
             --border-color: #e5e7eb;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
         }
         
         body { 
@@ -47,14 +43,14 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .btn, .btn-gradient, .btn-outline-accent { 
+        .btn, .btn-gradient { 
             transition: all 0.2s ease-in-out; 
             transform: scale(1); 
             border-radius: 12px;
             font-weight: 600;
             border: none;
         }
-        .btn:active, .btn-gradient:active, .btn-outline-accent:active { transform: scale(0.97); }
+        .btn:active, .btn-gradient:active { transform: scale(0.97); }
         .btn-gradient { 
             background-image: linear-gradient(to right, var(--accent-start), var(--accent-end));
             color: #ffffff; 
@@ -137,23 +133,7 @@
             animation: spin 1s infinite linear;
             margin-bottom: 1.5rem;
         }
-        .loader-text {
-            font-weight: 800; font-size: 1.75rem;
-            animation: fadeInText 1s ease-in-out 0.5s forwards; opacity: 0;
-        }
         @keyframes spin { to { transform: rotate(1turn); } }
-        @keyframes fadeInText { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .marquee {
-            background-color: var(--text-primary); color: white;
-            padding: 10px 0; white-space: nowrap; overflow: hidden;
-            box-shadow: 0 4px 10px rgba(31, 41, 55, 0.1);
-        }
-        .marquee-content {
-            display: inline-block; padding-left: 100%;
-            animation: marquee 25s linear infinite;
-        }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
         
         .modal-container {
              position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.7);
@@ -176,7 +156,6 @@
     <div id="loader" class="fixed inset-0 flex items-center justify-center z-[100]">
         <div class="text-center">
             <div class="loader-spinner"></div>
-            <h1 class="text-accent-gradient loader-text">MAIL SHOP</h1>
         </div>
     </div>
 
@@ -184,10 +163,10 @@
         <header class="header flex items-center justify-between p-4 sticky top-0 z-10">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--accent-start)]"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                   <i data-lucide="repeat" class="text-[var(--accent-start)]"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-accent-gradient">MAIL SHOP</h1>
+                    <h1 class="text-xl font-bold text-accent-gradient">Dollar Exchange</h1>
                     <p id="header-user-greeting" class="text-xs text-gray-500">Welcome back!</p>
                 </div>
             </div>
@@ -201,28 +180,60 @@
             <div id="home-page" class="space-y-6 sub-page p-4">
                 <div class="card-bg p-6 space-y-4">
                     <div class="flex items-center justify-between">
-                        <p class="text-gray-500 text-sm font-medium">Your Current Balance</p>
+                        <p class="text-gray-500 text-sm font-medium">Your Wallet Balance</p>
                         <i data-lucide="wallet" class="w-6 h-6 text-gray-400"></i>
                     </div>
                     <p id="balance-display" class="text-5xl font-extrabold text-gray-800">৳0.00</p>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="navigateTo('dollar-sell-page')" class="w-full p-3 rounded-xl btn-gradient flex items-center justify-center gap-2">
+                            <i data-lucide="dollar-sign" class="w-5 h-5"></i><span>Sell Dollar</span>
+                        </button>
+                        <button onclick="navigateTo('dollar-buy-page')" class="w-full p-3 rounded-xl bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Buy Dollar</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="relative w-full pt-[50%] rounded-2xl overflow-hidden shadow-lg">
-                    <div class="absolute top-0 left-0 w-full h-full flex transition-transform duration-700 ease-in-out" id="slides">
-                        <div class="min-w-full"><a href="https://t.me/EXPERTearn_team" target="_blank"><img src="https://i.postimg.cc/zBp8rCX9/Yellow-Orange-Modern-Marketing-Courses-You-Tube-Thumbnail-20250910-185659-0000.png" alt="Slide 1" class="w-full h-full object-cover"></a></div>
-                        <div class="min-w-full"><a href="https://t.me/EXPERTearn_team" target="_blank"><img src="https://i.postimg.cc/W1syFD8p/Grey-Blue-Illustration-Refer-a-Friend-Instagram-Post-1080-x-720-px-20250917-223749-0000.png" alt="Slide 2" class="w-full h-full object-cover"></a></div>
-                        <div class="min-w-full"><a href="https://t.me/EXPERTearn_team" target="_blank"><img src="https://i.postimg.cc/52HsFwvV/Black-and-Orange-Money-You-Tube-Thumbnail-20250917-224706-0000.png" alt="Slide 3" class="w-full h-full object-cover"></a></div>
+                    <div class="absolute top-0 left-0 w-full h-full" id="slides">
+                       <img src="https://i.postimg.cc/zBp8rCX9/Yellow-Orange-Modern-Marketing-Courses-You-Tube-Thumbnail-20250910-185659-0000.png" alt="Banner" class="w-full h-full object-cover">
                     </div>
-                    <div class="dots absolute bottom-3 w-full text-center z-10" id="dots"></div>
-                </div>
-
-                <div class="marquee">
-                    <p class="marquee-content">
-                        💌 MAIL SHOP-এ আপনাকে স্বাগতম! ⚡ কোনো সমস্যা হলে আমরা সঙ্গে সঙ্গে সমাধান করি। 💎 MAIL SHOP — বিশ্বাস, গুণমান ও সাপোর্টের প্রতীক!                        
-                    </p>
                 </div>
             </div>
             
+            <div id="dollar-sell-page" class="p-4 space-y-6 sub-page">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Sell Dollar</h2>
+                    <p class="text-gray-500">ডলার বিক্রি করে অ্যাপ ব্যালেন্সে টাকা নিন</p>
+                </div>
+                <div class="card-bg p-5 space-y-6">
+                    <div>
+                        <div id="sell-rate-display" class="text-lg font-semibold text-gray-700 mb-4 text-center p-3 rounded-xl border border-dashed border-indigo-500/50 bg-indigo-500/10">
+                            Sell Rate: <span class="font-bold text-indigo-600">Loading...</span>
+                        </div>
+                        <div id="admin-wallet-info" class="bg-gray-50 p-3 rounded-xl text-center border border-gray-200 space-y-2 mb-4">
+                            </div>
+                        <p class="text-sm text-gray-600 mb-4 text-center border-t border-gray-200 pt-4">ডলার পাঠানোর পর নিচের ফর্মটি পূরণ করুন:</p>
+                        <div class="space-y-4">
+                            <div><label for="sell-amount-usd" class="block text-sm font-medium text-gray-600 mb-2">কত ডলার পাঠিয়েছেন? (USD)</label><input id="sell-amount-usd" type="number" placeholder="e.g., 10" class="w-full p-3 input-field"></div>
+                            <div>
+                                <label for="receive-method" class="block text-sm font-medium text-gray-600 mb-2">টাকা কোন মাধ্যমে নিবেন?</label>
+                                <select id="receive-method" class="w-full p-3 input-field">
+                                    <option value="">Select Method</option>
+                                    <option value="Bkash">বিকাশ</option>
+                                    <option value="Nagad">নগদ</option>
+                                    <option value="Rocket">রকেট</option>
+                                </select>
+                            </div>
+                            <div><label for="receive-number" class="block text-sm font-medium text-gray-600 mb-2">আপনার পেমেন্ট নম্বর</label><input id="receive-number" type="text" placeholder="যে নম্বরে টাকা নিবেন" class="w-full p-3 input-field"></div>
+                            <div><label for="sell-txid" class="block text-sm font-medium text-gray-600 mb-2">Transaction/Batch ID</label><input id="sell-txid" type="text" placeholder="ডলার পাঠানোর পর পাওয়া TrxID" class="w-full p-3 input-field"></div>
+                            <button id="sell-request-btn" class="w-full p-3 btn-gradient">Submit Sell Request</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6"><h3 class="text-xl font-bold mb-3">Sell History</h3><div id="sell-history-list" class="space-y-3"></div></div>
+            </div>
+
             <div id="tutorial-page" class="p-4 space-y-6 sub-page">
                 <div class="text-center">
                     <h2 class="text-2xl font-bold text-gray-800">Tutorials</h2>
@@ -248,33 +259,16 @@
                         <i data-lucide="arrow-up-right" class="w-5 h-5 text-gray-600"></i>
                     </a>
                 </div>
-
-                <div class="card-bg p-4">
-                    <h3 class="text-md font-semibold text-gray-700 mb-4 text-center">Follow Us On</h3>
-                    <div class="flex justify-center items-center space-x-6">
-                       <a href="https://youtube.com/@saidulexpert?si=cT6fpmM13Qh7m2Zc" target="_blank" class="text-gray-600 hover:text-red-600 transition-transform hover:scale-110"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-                       <a href="https://t.me/SAIDULHP" target="_blank" class="text-gray-600 hover:text-sky-500 transition-transform hover:scale-110"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.65 12c-.88-.25-.89-1.02.2-1.3l15.67-6.11c.8-.32 1.45.19 1.18 1.1l-2.53 11.64c-.23.95-1.17 1.17-1.87.73l-4.5-3.33-2.15 2.07c-.24.24-.45.46-.8.46-.42 0-.59-.16-.69-.53z"/></svg></a>
-                       <a href="http://tiktok.com/@saidulexpert" target="_blank" class="text-gray-600 hover:text-black transition-transform hover:scale-110"><img src="https://i.postimg.cc/hPdCfhKD/download.png" alt="TikTok" class="w-8 h-8"></a>
-                    </div>
-                </div>
-                
-                <div class="mt-6">
-                    <h3 class="text-2xl font-bold text-center mb-4 text-gray-800">More Apps</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <a href="https://shorturl.at/FxO7m" target="_blank" class="card-bg p-4 flex flex-col items-center text-center space-y-3"><img src="https://i.postimg.cc/RFQwLZHn/IMG-20250926-201441-985.jpg?text=APP+1" class="w-20 h-20 rounded-2xl object-cover"><h4 class="font-bold text-lg text-accent-gradient">𝐄𝐗𝐏𝐄𝐑𝐓𝐞𝐚𝐫𝐧</h4><p class="text-xs text-gray-600">একদম ফ্রীতে ইনকাম করতে পারবেন </p></a>
-                        <a href="#" class="card-bg p-4 flex flex-col items-center text-center space-y-3"><img src="https://i.postimg.cc/7hTd1GyZ/air-drop-logo-96485-1865.jpg?text=APP+2" class="w-20 h-20 rounded-2xl object-cover"><h4 class="font-bold text-lg text-accent-gradient">Airdrop</h4><p class="text-xs text-gray-600">Coming soon.</p></a>
-                    </div>
-                </div>
-                
-                <div class="text-center pt-6">
+                 <div class="text-center pt-6">
                      <p class="text-center text-gray-600 text-sm">Developed by <a href="https://t.me/bd_Storebot/Botshop" target="_blank" class="font-semibold text-indigo-600 hover:underline">𝐁𝐃 𝐒𝐓𝐎𝐑𝐄</a></p>
                 </div>
             </div>
         </main>
 
         <nav class="bottom-nav flex justify-around items-center py-2">
+            <a href="#" class="nav-link-premium" data-page="home-page"><i data-lucide="home" class="icon"></i><span>Home</span></a>
             <a href="#" class="nav-link-premium" data-page="tutorial-page"><i data-lucide="film" class="icon"></i><span>Tutorial</span></a>            
-            <a href="#" class="nav-link-premium center-home-link active" data-page="home-page"><i data-lucide="home" class="icon"></i></a>
+            <a href="#" class="nav-link-premium center-home-link active" data-page="dollar-sell-page"><i data-lucide="dollar-sign" class="icon"></i></a>
             <a href="#" class="nav-link-premium" data-page="profile-page"><i data-lucide="user-circle-2" class="icon"></i><span>Profile</span></a>
         </nav>
     </div>
@@ -298,13 +292,14 @@
         };
         
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, serverTimestamp, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, serverTimestamp, query, getDocs, orderBy, where, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         let currentUserTg = null;
         let userData = null;
+        let exchangeConfig = {};
         
         const loader = document.getElementById('loader');
         const getLoadingHTML = () => `<div class="flex justify-center items-center p-10"><div class="w-14 h-14 border-4 border-t-indigo-500 border-gray-200 rounded-full animate-spin"></div></div>`;
@@ -320,14 +315,12 @@
                     return;
                 }
             } catch (e) { 
-                console.error("Telegram WebApp script failed to initialize or user data not available.", e); 
                 showAlert("Error initializing Telegram Mini App. Please try again from Telegram.");
                 loader.style.display = 'none';
                 return;
             }
             lucide.createIcons();
             setupEventListeners();
-            setupBanner(); 
             
             await initUserSession();
             
@@ -355,24 +348,30 @@
                     name: userName,
                     username: currentUserTg.username || null,
                     balance: 0, 
-                    createdAt: serverTimestamp(), 
-                    isBlocked: false,
-                    pin: null,
-                    pinFailAttempts: [],
-                    featuresLockedUntil: null
+                    createdAt: serverTimestamp()
                 };
                 await setDoc(userRef, userData);
             }
-
-            if (userData.isBlocked) {
-                showAlert("আপনার অ্যাকাউন্ট ব্লক করা হয়েছে।");
-                return;
-            }
-
+            
+            await fetchExchangeConfig();
             updateUI();
             showMainPage('app-container');
             navigateTo('home-page');
             document.getElementById('header-user-greeting').innerText = `Welcome, ${currentUserTg.first_name}!`;
+        }
+
+        async function fetchExchangeConfig() {
+            const configRef = doc(db, "config", "exchange");
+            const configSnap = await getDoc(configRef);
+            if (configSnap.exists()) {
+                exchangeConfig = configSnap.data();
+            } else {
+                // Default values if not set in Firestore
+                exchangeConfig = { 
+                    sellRateBdt: 115, 
+                    adminWallet: { type: 'Binance Pay', id: '0000000' } 
+                };
+            }
         }
 
         function updateUI() {
@@ -380,6 +379,20 @@
             const balance = (userData.balance || 0).toFixed(2);
             document.getElementById('balance-display').textContent = `৳${balance}`;
             document.getElementById('header-balance-display').textContent = `৳${balance}`;
+
+            // Update Sell Page UI
+            const sellRateEl = document.querySelector("#sell-rate-display span");
+            if(sellRateEl) sellRateEl.textContent = `${exchangeConfig.sellRateBdt || 'N/A'} BDT / USD`;
+
+            const adminWalletEl = document.getElementById("admin-wallet-info");
+            if(adminWalletEl && exchangeConfig.adminWallet) {
+                adminWalletEl.innerHTML = `
+                    <p class="font-bold text-md">${exchangeConfig.adminWallet.type}</p>
+                    <p class="text-gray-600 font-mono tracking-wider text-sm">${exchangeConfig.adminWallet.id}</p>
+                    <button onclick="copyToClipboard('${exchangeConfig.adminWallet.id}', this)" class="w-full text-xs p-1.5 mt-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy ID</span></button>
+                `;
+                lucide.createIcons();
+            }
         }
 
         function showMainPage(pageId) {
@@ -397,6 +410,7 @@
             const pageLoadFunctions = {
                 'profile-page': loadProfilePage,
                 'tutorial-page': loadTutorials,
+                'dollar-sell-page': loadSellHistory
             };
             if (pageLoadFunctions[pageId]) pageLoadFunctions[pageId]();
             lucide.createIcons();
@@ -406,8 +420,88 @@
         function setupEventListeners() {
             document.querySelectorAll('.nav-link-premium[data-page]').forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); navigateTo(link.dataset.page); }));
             document.getElementById('alert-ok-btn').addEventListener('click', () => document.getElementById('custom-alert').classList.add('hidden'));
+            document.getElementById('sell-request-btn').addEventListener('click', handleSellRequest);
         }
         
+        async function handleSellRequest() {
+            const amountUsd = parseFloat(document.getElementById('sell-amount-usd').value);
+            const receiveMethod = document.getElementById('receive-method').value;
+            const receiveNumber = document.getElementById('receive-number').value.trim();
+            const transactionId = document.getElementById('sell-txid').value.trim();
+
+            if (!amountUsd || amountUsd <= 0 || !receiveMethod || !receiveNumber || !transactionId) {
+                return showAlert("অনুগ্রহ করে সকল তথ্য সঠিকভাবে পূরণ করুন।");
+            }
+            
+            loader.style.opacity = '1';
+            loader.style.display = 'flex';
+            
+            try {
+                await addDoc(collection(db, "sell_requests"), {
+                    userId: userData.tgChatId,
+                    userName: userData.name,
+                    amountUsd: amountUsd,
+                    receiveMethod: receiveMethod,
+                    receiveNumber: receiveNumber,
+                    transactionId: transactionId,
+                    status: "pending",
+                    requestedAt: serverTimestamp()
+                });
+                showAlert("আপনার ডলার বিক্রির অনুরোধ সফলভাবে জমা হয়েছে। অ্যাডমিন পর্যালোচনা করে আপনার ব্যালেন্স যোগ করে দেবে।");
+                document.getElementById('sell-amount-usd').value = '';
+                document.getElementById('receive-method').value = '';
+                document.getElementById('receive-number').value = '';
+                document.getElementById('sell-txid').value = '';
+                loadSellHistory();
+            } catch (error) {
+                showAlert("অনুরোধ জমা দিতে একটি সমস্যা হয়েছে।");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        async function loadSellHistory() {
+            const historyList = document.getElementById('sell-history-list');
+            historyList.innerHTML = getLoadingHTML();
+            try {
+                const q = query(collection(db, "sell_requests"), where("userId", "==", userData.tgChatId), orderBy("requestedAt", "desc"));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    return historyList.innerHTML = '<p class="text-gray-600 text-center">কোনো লেনদেনের ইতিহাস পাওয়া যায়নি।</p>';
+                }
+
+                historyList.innerHTML = snapshot.docs.map(doc => {
+                    const item = doc.data();
+                    let statusColor, statusIcon;
+                    switch (item.status) {
+                        case 'approved': statusColor = 'text-green-600'; statusIcon = 'check-circle-2'; break;
+                        case 'rejected': statusColor = 'text-red-600'; statusIcon = 'x-circle'; break;
+                        default: statusColor = 'text-yellow-600'; statusIcon = 'hourglass';
+                    }
+                    const date = item.requestedAt ? item.requestedAt.toDate().toLocaleDateString('en-GB') : 'N/A';
+                    const amountBdt = (item.amountUsd * (exchangeConfig.sellRateBdt || 0)).toFixed(2);
+
+                    return `<div class="card-bg p-3 rounded-lg flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="${statusIcon}" class="w-6 h-6 ${statusColor}"></i>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">${item.receiveMethod} - ${item.receiveNumber}</p>
+                                        <p class="text-xs text-gray-500">${date}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold text-lg text-gray-800">$${item.amountUsd}</p>
+                                    <p class="font-semibold ${statusColor} capitalize text-xs">${item.status}</p>
+                                </div>
+                            </div>`;
+                }).join('');
+                lucide.createIcons();
+            } catch (error) {
+                console.error("Error loading sell history: ", error);
+                historyList.innerHTML = '<p class="text-red-600 text-center">ইতিহাস লোড করা যায়নি।</p>';
+            }
+        }
+
         function loadProfilePage() {
             const profilePic = document.getElementById('profile-pic');
             const avatarDiv = document.getElementById('profile-initials-avatar');
@@ -433,27 +527,21 @@
             document.getElementById('alert-message').innerText = message;
             document.getElementById('custom-alert').classList.remove('hidden');
         }
-        
-        function setupBanner() {
-            const slides = document.querySelectorAll('#slides .min-w-full');
-            const slideContainer = document.getElementById('slides');
-            const dotsContainer = document.getElementById('dots');
-            if (slides.length <= 1) return;
-            let index = 0;
-            const dotsHTML = Array.from(slides).map((_, i) => `<span class="dot inline-block h-2 w-2 m-1 rounded-full cursor-pointer transition-all ${i === 0 ? 'active w-4 bg-white' : 'bg-white/50'}" data-index="${i}"></span>`).join('');
-            dotsContainer.innerHTML = dotsHTML;
-            const dots = dotsContainer.querySelectorAll('.dot');
-            function showSlide(i) {
-                index = i;
-                slideContainer.style.transform = `translateX(${-i * 100}%)`;
-                dots.forEach(d => {
-                    d.classList.remove('active', 'w-4', 'bg-white');
-                    d.classList.add('bg-white/50');
-                });
-                dots[i].classList.add('active', 'w-4', 'bg-white');
-            }
-            dotsContainer.addEventListener('click', e => { if(e.target.matches('.dot')) showSlide(parseInt(e.target.dataset.index)); });
-            setInterval(() => showSlide((index + 1) % slides.length), 5000);
+
+        window.copyToClipboard = function(text, element) {
+            if (!text || typeof text !== 'string') return;
+            navigator.clipboard.writeText(text).then(() => {
+                if (element) {
+                    const originalContent = element.innerHTML;
+                    element.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-green-600"></i> Copied`;
+                    lucide.createIcons();
+                    setTimeout(() => { element.innerHTML = originalContent; lucide.createIcons(); }, 1500);
+                } else {
+                    showAlert('কপি করা হয়েছে!');
+                }
+            }).catch(err => {
+                showAlert('দুঃখিত, কপি করা যায়নি।');
+            });
         }
         
         async function loadTutorials() {
