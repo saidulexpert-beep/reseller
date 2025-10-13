@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAIL SHOP</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* === NEW: CSS Variables for Premium Theme === */
+        :root {
+            --bg-color: #f4f7fa;
+            --card-bg-color: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --accent-start: #4f46e5;
+            --accent-end: #7c3aed;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .card-bg { 
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 16px;
+        }
+        .card-bg:hover {
+            border-color: rgba(79, 70, 229, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        .text-accent-gradient {
+            background: linear-gradient(to right, var(--accent-start), var(--accent-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn, .btn-gradient, .btn-outline-accent { 
+            transition: all 0.2s ease-in-out; 
+            transform: scale(1); 
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+        }
+        .btn:active, .btn-gradient:active, .btn-outline-accent:active { transform: scale(0.97); }
+        .btn-gradient { 
+            background-image: linear-gradient(to right, var(--accent-start), var(--accent-end));
+            color: #ffffff; 
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+        }
+        .btn-gradient:hover { 
+            box-shadow: 0 7px 25px rgba(79, 70, 229, 0.35);
+            background-image: linear-gradient(to right, var(--accent-end), var(--accent-start));
+        }
+        .input-field { 
+            background-color: #f9fafb;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            border-radius: 12px;
+        }
+        .input-field:focus {
+            border-color: var(--accent-start);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+            outline: none;
+            background-color: #ffffff;
+        }
+        .main-page { display: none; }
+        .main-page.active { display: flex; animation: fadeIn 0.5s ease-in-out; }
+        .sub-page { display: none; }
+        .sub-page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        
+        .bottom-nav {
+             border-top: 1px solid var(--border-color);
+             background-color: rgba(255, 255, 255, 0.85);
+             backdrop-filter: blur(12px);
+             -webkit-backdrop-filter: blur(12px);
+             position: fixed;
+             bottom: 0;
+             left: 0;
+             right: 0;
+             max-width: 672px;
+             margin: 0 auto;
+             z-index: 50;
+        }
+        .nav-link-premium { 
+            display: flex; flex-direction: column; align-items: center; 
+            gap: 4px; color: var(--text-secondary); font-size: 0.75rem; 
+            font-weight: 500; padding: 8px; border-radius: 12px; 
+            transition: all 0.2s ease; position: relative; cursor: pointer; 
+            background: none; border: none; 
+        }
+        .nav-link-premium:hover { color: var(--text-primary); }
+        .nav-link-premium.active { color: var(--accent-start); font-weight: 600; }
+        .nav-link-premium .icon { width: 24px; height: 24px; }
+        .center-home-link { 
+            position: relative; transform: translateY(-24px) scale(1.1); 
+            background-image: linear-gradient(to bottom right, var(--accent-start), var(--accent-end)); 
+            border: 2px solid #fff;
+            border-radius: 50%; width: 64px; height: 64px; display: flex; 
+            align-items: center; justify-content: center; 
+            box-shadow: 0 6px 25px rgba(79, 70, 229, 0.4); 
+            transition: all 0.3s ease;
+        }
+        .center-home-link:hover { transform: translateY(-24px) scale(1.18); }
+        .center-home-link .icon { width: 32px; height: 32px; color: #fff; }
+        .header { 
+            border-bottom: 1px solid var(--border-color); 
+            background-color: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        #loader {
+            display: flex; flex-direction: column; justify-content: center; 
+            align-items: center; background-color: var(--bg-color);
+            transition: opacity 0.5s ease;
+        }
+        .loader-spinner {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(#0000 10%, var(--accent-start));
+            -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 9px), #000 0);
+            animation: spin 1s infinite linear;
+            margin-bottom: 1.5rem;
+        }
+        .loader-text {
+            font-weight: 800; font-size: 1.75rem;
+            animation: fadeInText 1s ease-in-out 0.5s forwards; opacity: 0;
+        }
+        @keyframes spin { to { transform: rotate(1turn); } }
+        @keyframes fadeInText { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .marquee {
+            background-color: var(--text-primary); color: white;
+            padding: 10px 0; white-space: nowrap; overflow: hidden;
+            box-shadow: 0 4px 10px rgba(31, 41, 55, 0.1);
+        }
+        .marquee-content {
+            display: inline-block; padding-left: 100%;
+            animation: marquee 25s linear infinite;
+        }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        
+        .modal-container {
+             position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.7);
+             display: flex; items-center; justify-content: center; z-index: 70;
+             padding: 1rem; backdrop-filter: blur(8px);
+             opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .modal-container:not(.hidden) { opacity: 1; visibility: visible; }
+        .modal-content {
+            background-color: var(--card-bg-color); border-radius: 20px;
+            padding: 1.5rem; width: 100%; max-width: 24rem; text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transform: scale(0.95); transition: transform 0.3s ease;
+        }
+        .modal-container:not(.hidden) .modal-content { transform: scale(1); }
+    </style>
+</head>
+<body class="max-w-md mx-auto">
+
+    <div id="loader" class="fixed inset-0 flex items-center justify-center z-[100]">
+        <div class="text-center">
+            <div class="loader-spinner"></div>
+            <h1 class="text-accent-gradient loader-text">MAIL SHOP</h1>
+        </div>
+    </div>
+
+    <div id="app-container" class="min-h-screen flex-col main-page">
+        <header class="header flex items-center justify-between p-4 sticky top-0 z-10">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--accent-start)]"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-accent-gradient">MAIL SHOP</h1>
+                    <p id="header-user-greeting" class="text-xs text-gray-500">Welcome back!</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-full text-sm font-semibold">
+                <i data-lucide="wallet" class="w-4 h-4"></i>
+                <span id="header-balance-display">৳0.00</span>
+            </div>
+        </header>
+
+        <main class="flex-grow pb-24">
+            <div id="home-page" class="space-y-6 sub-page p-4">
+                <div class="card-bg p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <p class="text-gray-500 text-sm font-medium">Your Current Balance</p>
+                        <i data-lucide="wallet" class="w-6 h-6 text-gray-400"></i>
+                    </div>
+                    <p id="balance-display" class="text-5xl font-extrabold text-gray-800">৳0.00</p>
+                </div>
+
+                <div class="relative w-full pt-[50%] rounded-2xl overflow-hidden shadow-lg">
+                    <div class="absolute top-0 left-0 w-full h-full flex transition-transform duration-700 ease-in-out" id="slides">
+                        <div class="min-w-full"><a href="https://t.me/EXPERTearn_team" target="_blank"><img src="https://i.postimg.cc/zBp8rCX9/Yellow-Orange-Modern-Marketing-Courses-You-Tube-Thumbnail-20250910-185659-0000.png" alt="Slide 1" class="w-full h-full object-cover"></a></div>
+                        <div class="min-w-full"><a href="https://t.me/EXPERTearn_team" target="_blank"><img src="https://i.postimg.cc/W1syFD8p/Grey-Blue-Illustration-Refer-a-Friend-Instagram-Post-1080-x-720-px-20250917-223749-0000.png" alt="Slide 2" class="w-full h-full object-cover"></a></div>
+                        <div class="min-w-full"><a href="https://t.me/EXPERTearn_team" target="_blank"><img src="https://i.postimg.cc/52HsFwvV/Black-and-Orange-Money-You-Tube-Thumbnail-20250917-224706-0000.png" alt="Slide 3" class="w-full h-full object-cover"></a></div>
+                    </div>
+                    <div class="dots absolute bottom-3 w-full text-center z-10" id="dots"></div>
+                </div>
+
+                <div class="marquee">
+                    <p class="marquee-content">
+                        💌 MAIL SHOP-এ আপনাকে স্বাগতম! ⚡ কোনো সমস্যা হলে আমরা সঙ্গে সঙ্গে সমাধান করি। 💎 MAIL SHOP — বিশ্বাস, গুণমান ও সাপোর্টের প্রতীক!                        
+                    </p>
+                </div>
+            </div>
+            
+            <div id="tutorial-page" class="p-4 space-y-6 sub-page">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Tutorials</h2>
+                    <p class="text-gray-500">নিচের তালিকা থেকে আপনার প্রয়োজনীয় ভিডিওটি দেখুন।</p>
+                </div>
+                <div id="tutorial-list" class="space-y-5"></div>
+            </div>
+
+            <div id="profile-page" class="p-4 space-y-6 sub-page">
+                <div class="card-bg p-6 flex flex-col items-center text-center">
+                    <div class="relative mb-4">
+                        <img id="profile-pic" class="w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover hidden" src="" alt="Profile Picture">
+                        <div id="profile-initials-avatar" class="w-28 h-28 rounded-full bg-indigo-100 flex items-center justify-center border-4 border-white shadow-lg"><span id="profile-initials" class="text-4xl font-bold text-indigo-500"></span></div>
+                    </div>
+                    <h3 id="profile-name" class="text-2xl font-bold text-gray-800">Loading...</h3>
+                    <p id="profile-username" class="text-gray-500">@username</p>
+                    <p id="profile-id" class="text-sm text-gray-600 mt-2 bg-gray-100 px-3 py-1 rounded-full">ID: 123456</p>
+                </div>
+
+                <div class="space-y-3">
+                    <a href="https://t.me/earn_Supportbot" target="_blank" class="w-full card-bg p-4 rounded-xl flex justify-between items-center text-left text-lg font-semibold">
+                        <div class="flex items-center gap-3"><i data-lucide="message-square" class="w-6 h-6 text-green-500"></i><span>Support Team</span></div>
+                        <i data-lucide="arrow-up-right" class="w-5 h-5 text-gray-600"></i>
+                    </a>
+                </div>
+
+                <div class="card-bg p-4">
+                    <h3 class="text-md font-semibold text-gray-700 mb-4 text-center">Follow Us On</h3>
+                    <div class="flex justify-center items-center space-x-6">
+                       <a href="https://youtube.com/@saidulexpert?si=cT6fpmM13Qh7m2Zc" target="_blank" class="text-gray-600 hover:text-red-600 transition-transform hover:scale-110"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                       <a href="https://t.me/SAIDULHP" target="_blank" class="text-gray-600 hover:text-sky-500 transition-transform hover:scale-110"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.65 12c-.88-.25-.89-1.02.2-1.3l15.67-6.11c.8-.32 1.45.19 1.18 1.1l-2.53 11.64c-.23.95-1.17 1.17-1.87.73l-4.5-3.33-2.15 2.07c-.24.24-.45.46-.8.46-.42 0-.59-.16-.69-.53z"/></svg></a>
+                       <a href="http://tiktok.com/@saidulexpert" target="_blank" class="text-gray-600 hover:text-black transition-transform hover:scale-110"><img src="https://i.postimg.cc/hPdCfhKD/download.png" alt="TikTok" class="w-8 h-8"></a>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-gray-800">More Apps</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="https://shorturl.at/FxO7m" target="_blank" class="card-bg p-4 flex flex-col items-center text-center space-y-3"><img src="https://i.postimg.cc/RFQwLZHn/IMG-20250926-201441-985.jpg?text=APP+1" class="w-20 h-20 rounded-2xl object-cover"><h4 class="font-bold text-lg text-accent-gradient">𝐄𝐗𝐏𝐄𝐑𝐓𝐞𝐚𝐫𝐧</h4><p class="text-xs text-gray-600">একদম ফ্রীতে ইনকাম করতে পারবেন </p></a>
+                        <a href="#" class="card-bg p-4 flex flex-col items-center text-center space-y-3"><img src="https://i.postimg.cc/7hTd1GyZ/air-drop-logo-96485-1865.jpg?text=APP+2" class="w-20 h-20 rounded-2xl object-cover"><h4 class="font-bold text-lg text-accent-gradient">Airdrop</h4><p class="text-xs text-gray-600">Coming soon.</p></a>
+                    </div>
+                </div>
+                
+                <div class="text-center pt-6">
+                     <p class="text-center text-gray-600 text-sm">Developed by <a href="https://t.me/bd_Storebot/Botshop" target="_blank" class="font-semibold text-indigo-600 hover:underline">𝐁𝐃 𝐒𝐓𝐎𝐑𝐄</a></p>
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav flex justify-around items-center py-2">
+            <a href="#" class="nav-link-premium" data-page="tutorial-page"><i data-lucide="film" class="icon"></i><span>Tutorial</span></a>            
+            <a href="#" class="nav-link-premium center-home-link active" data-page="home-page"><i data-lucide="home" class="icon"></i></a>
+            <a href="#" class="nav-link-premium" data-page="profile-page"><i data-lucide="user-circle-2" class="icon"></i><span>Profile</span></a>
+        </nav>
+    </div>
+
+    <div id="custom-alert" class="modal-container hidden">
+        <div class="modal-content space-y-4">
+            <p id="alert-message" class="text-gray-700 whitespace-pre-wrap"></p>
+            <button id="alert-ok-btn" class="btn-gradient px-8 py-2 w-full">OK</button>
+        </div>
+    </div>
+    
+    <script type="module">
+        const firebaseConfig = {
+          apiKey: "AIzaSyCoCy08FL_sHHdA0f2cJg0BaF-iYAhFuk0",
+          authDomain: "mail-store-4692b.firebaseapp.com",
+          databaseURL: "https://mail-store-4692b-default-rtdb.firebaseio.com",
+          projectId: "mail-store-4692b",
+          storageBucket: "mail-store-4692b.firebasestorage.app",
+          messagingSenderId: "264936867411",
+          appId: "1:264936867411:web:5933919e5bafae617968a6"
+        };
+        
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, serverTimestamp, query, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentUserTg = null;
+        let userData = null;
+        
+        const loader = document.getElementById('loader');
+        const getLoadingHTML = () => `<div class="flex justify-center items-center p-10"><div class="w-14 h-14 border-4 border-t-indigo-500 border-gray-200 rounded-full animate-spin"></div></div>`;
+
+        window.onload = async () => {
+            try {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.expand();
+                currentUserTg = window.Telegram.WebApp.initDataUnsafe.user;
+                if (!currentUserTg) {
+                    showAlert("Telegram user data not found. Please open this app from Telegram.");
+                    loader.style.display = 'none';
+                    return;
+                }
+            } catch (e) { 
+                console.error("Telegram WebApp script failed to initialize or user data not available.", e); 
+                showAlert("Error initializing Telegram Mini App. Please try again from Telegram.");
+                loader.style.display = 'none';
+                return;
+            }
+            lucide.createIcons();
+            setupEventListeners();
+            setupBanner(); 
+            
+            await initUserSession();
+            
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        };
+
+        async function initUserSession() {
+            if (!currentUserTg) {
+                showAlert("Telegram user data is missing. Cannot proceed.");
+                return;
+            }
+            const tgChatId = String(currentUserTg.id);
+            const userRef = doc(db, "users", tgChatId);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+                userData = userSnap.data();
+            } else {
+                const userName = `${currentUserTg.first_name || ''} ${currentUserTg.last_name || ''}`.trim() || `User ${tgChatId}`;
+                userData = { 
+                    tgChatId: tgChatId,
+                    name: userName,
+                    username: currentUserTg.username || null,
+                    balance: 0, 
+                    createdAt: serverTimestamp(), 
+                    isBlocked: false,
+                    pin: null,
+                    pinFailAttempts: [],
+                    featuresLockedUntil: null
+                };
+                await setDoc(userRef, userData);
+            }
+
+            if (userData.isBlocked) {
+                showAlert("আপনার অ্যাকাউন্ট ব্লক করা হয়েছে।");
+                return;
+            }
+
+            updateUI();
+            showMainPage('app-container');
+            navigateTo('home-page');
+            document.getElementById('header-user-greeting').innerText = `Welcome, ${currentUserTg.first_name}!`;
+        }
+
+        function updateUI() {
+            if (!userData) return;
+            const balance = (userData.balance || 0).toFixed(2);
+            document.getElementById('balance-display').textContent = `৳${balance}`;
+            document.getElementById('header-balance-display').textContent = `৳${balance}`;
+        }
+
+        function showMainPage(pageId) {
+            document.querySelectorAll('.main-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+        
+        function navigateTo(pageId) {
+            document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-link-premium[data-page]').forEach(link => {
+                link.classList.toggle('active', link.dataset.page === pageId);
+            });
+            
+            const pageLoadFunctions = {
+                'profile-page': loadProfilePage,
+                'tutorial-page': loadTutorials,
+            };
+            if (pageLoadFunctions[pageId]) pageLoadFunctions[pageId]();
+            lucide.createIcons();
+        }
+        window.navigateTo = navigateTo;
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-link-premium[data-page]').forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); navigateTo(link.dataset.page); }));
+            document.getElementById('alert-ok-btn').addEventListener('click', () => document.getElementById('custom-alert').classList.add('hidden'));
+        }
+        
+        function loadProfilePage() {
+            const profilePic = document.getElementById('profile-pic');
+            const avatarDiv = document.getElementById('profile-initials-avatar');
+            
+            if (currentUserTg) {
+                if (currentUserTg.photo_url) {
+                    profilePic.src = currentUserTg.photo_url;
+                    profilePic.classList.remove('hidden');
+                    avatarDiv.classList.add('hidden');
+                } else {
+                    const initials = (currentUserTg.first_name?.[0] || '') + (currentUserTg.last_name?.[0] || '');
+                    document.getElementById('profile-initials').textContent = initials.toUpperCase();
+                    profilePic.classList.add('hidden');
+                    avatarDiv.classList.remove('hidden');
+                }
+                document.getElementById('profile-name').textContent = `${currentUserTg.first_name} ${currentUserTg.last_name || ''}`.trim();
+                document.getElementById('profile-username').textContent = currentUserTg.username ? `@${currentUserTg.username}` : 'No Telegram Username';
+                document.getElementById('profile-id').textContent = `ID: ${currentUserTg.id}`;
+            }
+        }
+
+        function showAlert(message) {
+            document.getElementById('alert-message').innerText = message;
+            document.getElementById('custom-alert').classList.remove('hidden');
+        }
+        
+        function setupBanner() {
+            const slides = document.querySelectorAll('#slides .min-w-full');
+            const slideContainer = document.getElementById('slides');
+            const dotsContainer = document.getElementById('dots');
+            if (slides.length <= 1) return;
+            let index = 0;
+            const dotsHTML = Array.from(slides).map((_, i) => `<span class="dot inline-block h-2 w-2 m-1 rounded-full cursor-pointer transition-all ${i === 0 ? 'active w-4 bg-white' : 'bg-white/50'}" data-index="${i}"></span>`).join('');
+            dotsContainer.innerHTML = dotsHTML;
+            const dots = dotsContainer.querySelectorAll('.dot');
+            function showSlide(i) {
+                index = i;
+                slideContainer.style.transform = `translateX(${-i * 100}%)`;
+                dots.forEach(d => {
+                    d.classList.remove('active', 'w-4', 'bg-white');
+                    d.classList.add('bg-white/50');
+                });
+                dots[i].classList.add('active', 'w-4', 'bg-white');
+            }
+            dotsContainer.addEventListener('click', e => { if(e.target.matches('.dot')) showSlide(parseInt(e.target.dataset.index)); });
+            setInterval(() => showSlide((index + 1) % slides.length), 5000);
+        }
+        
+        async function loadTutorials() {
+            const listEl = document.getElementById('tutorial-list');
+            listEl.innerHTML = getLoadingHTML();
+            try {
+                const q = query(collection(db, "tutorials"), orderBy("order"));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) return listEl.innerHTML = '<p class="text-center text-gray-600">কোনো টিউটোরিয়াল পাওয়া যায়নি।</p>';
+                listEl.innerHTML = snapshot.docs.map(doc => {
+                    const t = doc.data();
+                    return `<div class="card-bg p-4"><h3 class="font-bold text-lg text-gray-800 mb-3">${t.title}</h3><div class="relative pt-[56.25%] h-0 overflow-hidden rounded-lg bg-gray-200"><iframe class="absolute top-0 left-0 w-full h-full" src="${t.youtubeEmbedUrl}" title="${t.title}" frameborder="0" allowfullscreen></iframe></div></div>`;
+                }).join('');
+            } catch (e) { listEl.innerHTML = '<p class="text-center text-red-600">টিউটোরিয়াল লোড করা যায়নি।</p>'; }
+        }
+    </script>
+</body>
+</html>
