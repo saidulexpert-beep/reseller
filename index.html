@@ -9,9 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* === NEW: CSS Variables for Premium Theme === */
         :root {
             --bg-color: #f4f7fa;
             --card-bg-color: #ffffff;
@@ -47,14 +45,14 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .btn, .btn-gradient, .btn-outline-accent { 
+        .btn, .btn-gradient { 
             transition: all 0.2s ease-in-out; 
             transform: scale(1); 
             border-radius: 12px;
             font-weight: 600;
             border: none;
         }
-        .btn:active, .btn-gradient:active, .btn-outline-accent:active { transform: scale(0.97); }
+        .btn:active, .btn-gradient:active { transform: scale(0.97); }
         .btn-gradient { 
             background-image: linear-gradient(to right, var(--accent-start), var(--accent-end));
             color: #ffffff; 
@@ -100,7 +98,7 @@
             gap: 4px; color: var(--text-secondary); font-size: 0.75rem; 
             font-weight: 500; padding: 8px; border-radius: 12px; 
             transition: all 0.2s ease; position: relative; cursor: pointer; 
-            background: none; border: none; 
+            background: none; border: none; width: 64px;
         }
         .nav-link-premium:hover { color: var(--text-primary); }
         .nav-link-premium.active { color: var(--accent-start); font-weight: 600; }
@@ -144,17 +142,6 @@
         @keyframes spin { to { transform: rotate(1turn); } }
         @keyframes fadeInText { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .marquee {
-            background-color: var(--text-primary); color: white;
-            padding: 10px 0; white-space: nowrap; overflow: hidden;
-            box-shadow: 0 4px 10px rgba(31, 41, 55, 0.1);
-        }
-        .marquee-content {
-            display: inline-block; padding-left: 100%;
-            animation: marquee 25s linear infinite;
-        }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
-
         .fab-button {
             position: fixed; bottom: 100px; width: 56px; height: 56px;
             border-radius: 18px; display: flex; align-items: center; justify-content: center;
@@ -180,6 +167,14 @@
             transform: scale(0.95); transition: transform 0.3s ease;
         }
         .modal-container:not(.hidden) .modal-content { transform: scale(1); }
+        .dollar-tab-btn {
+            flex: 1; padding: 12px; font-weight: 600; color: var(--text-secondary);
+            border-bottom: 3px solid transparent; transition: all 0.3s;
+        }
+        .dollar-tab-btn.active {
+            color: var(--accent-start);
+            border-bottom-color: var(--accent-start);
+        }
     </style>
 </head>
 <body class="max-w-md mx-auto">
@@ -195,7 +190,7 @@
         <header class="header flex items-center justify-between p-4 sticky top-0 z-10">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--accent-start)]"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <i data-lucide="mail" class="text-[var(--accent-start)]"></i>
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-accent-gradient">MAIL SHOP</h1>
@@ -220,8 +215,8 @@
                         <button id="home-deposit-btn" class="w-full p-3 rounded-xl btn-gradient flex items-center justify-center gap-2">
                             <i data-lucide="arrow-down-to-line" class="w-5 h-5"></i><span>Deposit</span>
                         </button>
-                        <button onclick="navigateTo('post-page')" class="w-full p-3 rounded-xl bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                            <i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Post</span>
+                        <button onclick="navigateTo('dollar-page')" class="w-full p-3 rounded-xl bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="dollar-sign" class="w-5 h-5"></i><span>Dollar</span>
                         </button>
                     </div>
                 </div>
@@ -259,7 +254,7 @@
                         <div class="space-y-4">
                              <div><label for="deposit-method" class="block text-sm font-medium text-gray-600 mb-2">পেমেন্ট মাধ্যম</label><select id="deposit-method" class="w-full p-3 input-field"><option value="">কোন মাধ্যমে টাকা পাঠিয়েছেন?</option><option value="Nagad">নগদ</option><option value="bKash">বিকাশ</option><option value="Rocket">রকেট</option><option value="Binance">Binance</option></select></div>
                             <div><label for="deposit-amount" class="block text-sm font-medium text-gray-600 mb-2">টাকার পরিমাণ (BDT)</label><input id="deposit-amount" type="number" placeholder="e.g., 100" class="w-full p-3 input-field"></div>
-                            <div><label for="sender-number" class="block text-sm font-medium text-gray-600 mb-2">আপনার পেমেন্ট নম্বর</label><input id="sender-number" type="text" placeholder="যে নম্বর থেকে টাকা পাঠিয়েছেন" class="w-full p-3 input-field"></div>
+                            <div><label for="sender-number" class="block text-sm font-medium text-gray-600 mb-2">আপনার পেমেন্ট নম্বর/আইডি</label><input id="sender-number" type="text" placeholder="যে নম্বর বা আইডি থেকে টাকা পাঠিয়েছেন" class="w-full p-3 input-field"></div>
                             <div><label for="deposit-txid" class="block text-sm font-medium text-gray-600 mb-2">Transaction ID (TrxID)</label><input id="deposit-txid" type="text" placeholder="টাকা পাঠানোর পর পাওয়া TrxID" class="w-full p-3 input-field"></div>
                             <button id="deposit-btn" class="w-full p-3 btn-gradient">Submit Deposit Request</button>
                         </div>
@@ -268,33 +263,85 @@
                 <div class="mt-6"><h3 class="text-xl font-bold mb-3">Payment History</h3><div id="payment-history-list" class="space-y-3"></div></div>
             </div>
 
-            <div id="post-page" class="p-4 space-y-6 sub-page">
-                 <div class="marquee">
-                    <p class="marquee-content">
-                        💌 MAIL SHOP-এ আপনাকে স্বাগতম! ⚡ কোনো সমস্যা হলে আমরা সঙ্গে সঙ্গে সমাধান করি। 💎 MAIL SHOP — বিশ্বাস, গুণমান ও সাপোর্টের প্রতীক!                        
-                    </p>
-                </div>
-                <a href="t.me/mail_storebot/reseller" target="_blank" class="w-full p-4 rounded-xl flex justify-between items-center text-left text-lg font-semibold bg-purple-600 text-white hover:bg-purple-700 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="store" class="w-6 h-6"></i>
-                        <span>𝗥𝗘𝗦𝗘𝗟𝗟𝗘𝗥 𝗭𝗢𝗡𝗘</span>
-                    </div>
-                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                </a>
+            <div id="dollar-page" class="p-4 space-y-6 sub-page">
                 <div class="text-center">
-                    <h2 class="text-2xl font-bold text-gray-800">POST SHOP</h2>
-                    <p class="text-gray-500">আপনার পছন্দের পোস্টটি বেছে নিন</p>
+                    <h2 class="text-2xl font-bold text-gray-800">Dollar Buy & Sell</h2>
+                    <p class="text-gray-500">আপনার USDT (BEP20) কিনুন বা বিক্রি করুন</p>
                 </div>
-                <div id="post-list" class="space-y-4"></div>
-                 <div>
-                    <div class="flex justify-between items-center mb-3 mt-8">
-                        <h3 class="text-xl font-bold">Buy History</h3>
-                        <div class="flex items-center gap-2">
-                           <button id="copy-history-btn" class="bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"><i data-lucide="copy" class="w-5 h-5"></i></button>
-                           <button id="download-history-btn" class="bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors"><i data-lucide="download" class="w-5 h-5"></i></button>
-                        </div>
+
+                <div class="card-bg p-1">
+                    <div class="flex">
+                        <button id="dollar-buy-tab" class="dollar-tab-btn active">Buy USDT</button>
+                        <button id="dollar-sell-tab" class="dollar-tab-btn">Sell USDT</button>
                     </div>
-                    <div id="post-purchase-history" class="space-y-3"></div>
+                </div>
+
+                <div id="buy-dollar-form" class="card-bg p-5 space-y-5">
+                    <div class="text-center bg-indigo-50 p-3 rounded-lg">
+                        <p class="font-bold text-lg text-indigo-700">Buy Rate: <span id="buy-rate-display">৳0.00</span> / USDT</p>
+                        <p class="text-xs text-indigo-500">আপনার অ্যাপ ব্যালেন্স ব্যবহার করে USDT কিনুন</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="buy-amount-usd" class="block text-sm font-medium text-gray-600 mb-2">Amount you want to buy (USDT)</label>
+                            <input id="buy-amount-usd" type="number" placeholder="e.g., 10" class="w-full p-3 input-field">
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Cost (BDT)</p>
+                            <p id="buy-total-bdt" class="text-2xl font-bold text-gray-800 p-3 bg-gray-50 rounded-lg text-center">৳0.00</p>
+                        </div>
+                        <div>
+                            <label for="buy-binance-id" class="block text-sm font-medium text-gray-600 mb-2">Your Binance Pay ID</label>
+                            <input id="buy-binance-id" type="text" placeholder="Enter your Pay ID" class="w-full p-3 input-field">
+                        </div>
+                        <button id="submit-buy-request-btn" class="w-full p-3 btn-gradient">Request to Buy USDT</button>
+                    </div>
+                </div>
+
+                <div id="sell-dollar-form" class="card-bg p-5 space-y-5 hidden">
+                     <div class="text-center bg-green-50 p-3 rounded-lg">
+                        <p class="font-bold text-lg text-green-700">Sell Rate: <span id="sell-rate-display">৳0.00</span> / USDT</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl text-center border border-gray-200 space-y-2">
+                        <p class="font-bold text-md">আমাদের Binance Pay ID</p>
+                        <p class="text-gray-600 font-mono tracking-wider text-lg">1085460262</p>
+                        <button onclick="copyToClipboard('1085460262', this)" class="w-full text-sm p-2 mt-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="copy" class="w-4 h-4"></i><span>Copy ID</span></button>
+                        <p class="text-xs text-red-600 pt-2">উপরের আইডিতে USDT পাঠানোর পর নিচের ফর্মটি পূরণ করুন।</p>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="sell-amount-usd" class="block text-sm font-medium text-gray-600 mb-2">Amount you sold (USDT)</label>
+                            <input id="sell-amount-usd" type="number" placeholder="e.g., 10" class="w-full p-3 input-field">
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">You will receive (BDT)</p>
+                            <p id="sell-total-bdt" class="text-2xl font-bold text-gray-800 p-3 bg-gray-50 rounded-lg text-center">৳0.00</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="sell-payment-method" class="block text-sm font-medium text-gray-600 mb-2">Receive Method</label>
+                                <select id="sell-payment-method" class="w-full p-3 input-field">
+                                    <option value="bKash">বিকাশ</option>
+                                    <option value="Nagad">নগদ</option>
+                                    <option value="Rocket">রকেট</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="sell-payment-number" class="block text-sm font-medium text-gray-600 mb-2">Payment Number</label>
+                                <input id="sell-payment-number" type="text" placeholder="Your number" class="w-full p-3 input-field">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="sell-txid" class="block text-sm font-medium text-gray-600 mb-2">Binance Transaction ID (Optional)</label>
+                            <input id="sell-txid" type="text" placeholder="Paste transaction hash here" class="w-full p-3 input-field">
+                        </div>
+                        <button id="submit-sell-request-btn" class="w-full p-3 btn-gradient">Request to Sell USDT</button>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <h3 class="text-xl font-bold mb-3">Transaction History</h3>
+                    <div id="dollar-history-list" class="space-y-3"></div>
                 </div>
             </div>
 
@@ -302,9 +349,6 @@
                 <div class="space-y-4">
                      <a href="https://t.me/BestMarketMain" target="_blank" class="w-full p-4 rounded-xl flex justify-between items-center text-left text-lg font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors">
                         <div class="flex items-center gap-3"><i data-lucide="send" class="w-6 h-6"></i><span>𝐎𝐅𝐅𝐈𝐂𝐈𝐀𝐋 𝐂𝐇𝐀𝐍𝐍𝐄𝐋</span></div><i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    </a>
-                    <a href="t.me/mail_storebot/reseller" target="_blank" class="w-full p-4 rounded-xl flex justify-between items-center text-left text-lg font-semibold bg-green-500 text-white hover:bg-green-600 transition-colors">
-                        <div class="flex items-center gap-3"><i data-lucide="percent" class="w-6 h-6"></i><span>𝗥𝗘𝗦𝗘𝗟𝗟𝗘𝗥 𝟮𝟬% 𝗢𝗙𝗙</span></div><i data-lucide="arrow-right" class="w-5 h-5"></i>
                     </a>
                 </div>
                 <h2 class="text-2xl font-bold text-center text-gray-800 pt-4">Latest Updates</h2>
@@ -447,7 +491,7 @@
             <a href="#" class="nav-link-premium" data-page="updates-page"><i data-lucide="bell" class="icon"></i><span>Updates</span></a>
             <a href="#" class="nav-link-premium" data-page="tutorial-page"><i data-lucide="film" class="icon"></i><span>Tutorial</span></a>            
             <a href="#" class="nav-link-premium center-home-link active" data-page="home-page"><i data-lucide="home" class="icon"></i></a>
-            <a href="#" class="nav-link-premium" data-page="post-page"><i data-lucide="pen-square" class="icon"></i><span>Post</span></a>            
+            <a href="#" class="nav-link-premium" data-page="dollar-page"><i data-lucide="dollar-sign" class="icon"></i><span>Dollar</span></a>            
             <a href="#" class="nav-link-premium" data-page="profile-page"><i data-lucide="user-circle-2" class="icon"></i><span>Profile</span></a>
         </nav>
     </div>
@@ -466,7 +510,7 @@
         <div class="modal-content space-y-4">
             <i data-lucide="wallet" class="w-12 h-12 text-amber-500 mx-auto"></i>
             <h3 class="text-xl font-bold text-gray-800">ব্যালেন্স কম!</h3>
-            <p class="text-gray-600">স্টক সীমিত, তাই তাড়াতাড়ি কিনুন। এখনই ডিপোজিট করে আপনার পোস্টটি সংগ্রহ করুন।</p>
+            <p class="text-gray-600">আপনার USDT কেনার জন্য পর্যাপ্ত ব্যালেন্স নেই। অনুগ্রহ করে প্রথমে ডিপোজিট করুন।</p>
             <button id="insufficient-balance-deposit-btn" class="w-full p-3 btn-gradient mt-4">Deposit Now</button>
         </div>
     </div>
@@ -493,13 +537,6 @@
             </div>
         </div>
     </div>
-    <div id="post-details-modal" class="modal-container hidden">
-        <div class="modal-content space-y-4">
-            <h3 id="post-details-title" class="text-2xl font-bold text-center text-accent-gradient">Post Details</h3>
-            <div id="post-details-content" class="text-gray-700 bg-gray-100 p-4 rounded-lg whitespace-pre-wrap text-sm leading-relaxed max-h-60 overflow-y-auto"></div>
-            <button id="post-details-ok-btn" class="w-full p-3 btn-gradient">Got It!</button>
-        </div>
-    </div>
     <div id="deposit-details-modal" class="modal-container hidden">
         <div class="modal-content space-y-4">
             <h3 class="text-xl font-bold text-center text-accent-gradient mb-4">How to Deposit</h3>
@@ -519,7 +556,6 @@
     </div>
 
     <script type="module">
-        const ADMIN_UID = "7358825471"; // This can be removed or kept for other potential uses
         const firebaseConfig = {
           apiKey: "AIzaSyCoCy08FL_sHHdA0f2cJg0BaF-iYAhFuk0",
           authDomain: "mail-store-4692b.firebaseapp.com",
@@ -531,7 +567,7 @@
         };
         
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit, runTransaction, getCountFromServer, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit, runTransaction, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -539,8 +575,11 @@
         let currentUserTg = null;
         let userData = null;
         let appConfig = {};
-        let insufficientBalanceInterval = null; 
         
+        // --- Dollar Rates (These should ideally be fetched from Firebase config) ---
+        const DOLLAR_BUY_RATE = 125.00; // The price user pays to buy 1 USDT
+        const DOLLAR_SELL_RATE = 120.00; // The price admin pays to user for 1 USDT
+
         const loader = document.getElementById('loader');
         const getLoadingHTML = () => `<div class="flex justify-center items-center p-10"><div class="w-14 h-14 border-4 border-t-indigo-500 border-gray-200 rounded-full animate-spin"></div></div>`;
 
@@ -555,7 +594,6 @@
                     return;
                 }
             } catch (e) { 
-                console.error("Telegram WebApp script failed to initialize or user data not available.", e); 
                 showAlert("Error initializing Telegram Mini App. Please try again from Telegram.");
                 loader.style.display = 'none';
                 return;
@@ -604,18 +642,13 @@
                 return;
             }
 
-            await fetchAppConfig();
+            // You can fetch appConfig if you store rates in Firebase
+            // await fetchAppConfig();
             
             updateUI();
             showMainPage('app-container');
             navigateTo('home-page');
             document.getElementById('header-user-greeting').innerText = `Welcome, ${currentUserTg.first_name}!`;
-        }
-
-        async function fetchAppConfig() {
-            const configRef = doc(db, "config", "main");
-            const configSnap = await getDoc(configRef);
-            appConfig = configSnap.exists() ? configSnap.data() : { mails: [] };
         }
         
         function updateUI() {
@@ -631,11 +664,6 @@
         }
         
         function navigateTo(pageId) {
-            if (pageId !== 'post-page' && insufficientBalanceInterval) {
-                clearInterval(insufficientBalanceInterval);
-                insufficientBalanceInterval = null;
-            }
-
             document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             document.querySelectorAll('.nav-link-premium[data-page]').forEach(link => {
@@ -643,12 +671,12 @@
             });
 
             document.getElementById('fab-updates-plus').classList.toggle('visible', pageId === 'updates-page');
-            document.getElementById('fab-common-telegram').classList.toggle('visible', pageId === 'home-page' || pageId === 'post-page');
+            document.getElementById('fab-common-telegram').classList.toggle('visible', pageId === 'home-page' || pageId === 'dollar-page');
             document.getElementById('fab-features-whatsapp').classList.toggle('visible', pageId === 'features-page');
             
             const pageLoadFunctions = {
                 'pay-page': loadPaymentHistory,
-                'post-page': loadPostStore,
+                'dollar-page': loadDollarBuySellPage,
                 'updates-page': loadUpdates,
                 'profile-page': loadProfilePage,
                 'features-page': loadFeaturesPage,
@@ -672,8 +700,6 @@
             document.getElementById('header-deposit-btn').addEventListener('click', () => navigateTo('pay-page'));
             document.getElementById('deposit-btn').addEventListener('click', handleDepositRequest);
             document.getElementById('home-deposit-btn').addEventListener('click', () => navigateTo('pay-page'));
-            document.getElementById('download-history-btn').addEventListener('click', handleDownloadHistory);
-            document.getElementById('copy-history-btn').addEventListener('click', handleCopyHistory);
             document.getElementById('deposit-details-ok-btn').addEventListener('click', () => document.getElementById('deposit-details-modal').classList.add('hidden'));
 
             document.getElementById('more-features-btn').addEventListener('click', handleFeaturesClick);
@@ -688,8 +714,7 @@
             document.getElementById('enter-pin-btn').addEventListener('click', handleEnterPin);
             document.getElementById('cancel-pin-set-btn').addEventListener('click', () => document.getElementById('pin-set-modal').classList.add('hidden'));
             document.getElementById('cancel-pin-enter-btn').addEventListener('click', () => document.getElementById('pin-enter-modal').classList.add('hidden'));
-
-            document.getElementById('post-details-ok-btn').addEventListener('click', () => document.getElementById('post-details-modal').classList.add('hidden'));
+            
             document.getElementById('insufficient-balance-deposit-btn').addEventListener('click', () => {
                 document.getElementById('insufficient-balance-modal').classList.add('hidden');
                 navigateTo('pay-page');
@@ -729,12 +754,6 @@
             loader.style.display = 'flex';
             
             try {
-                const depositQuery = query(collection(db, "deposits"), where("transactionId", "==", transactionId), where("status", "in", ["pending", "approved"]));
-                const querySnapshot = await getDocs(depositQuery);
-                if (!querySnapshot.empty) {
-                    loader.style.display = 'none';
-                    return showAlert("এই Transaction ID দিয়ে ইতিমধ্যে একটি ডিপোজিট অনুরোধ জমা দেওয়া হয়েছে।");
-                }
                 await addDoc(collection(db, "deposits"), {
                     userId: userData.tgChatId,
                     userName: userData.name,
@@ -762,7 +781,7 @@
             const historyList = document.getElementById('payment-history-list');
             historyList.innerHTML = getLoadingHTML();
             try {
-                const q = query(collection(db, "deposits"), where("userId", "==", userData.tgChatId), orderBy("requestedAt", "desc"));
+                const q = query(collection(db, "deposits"), where("userId", "==", userData.tgChatId), orderBy("requestedAt", "desc"), limit(10));
                 const snapshot = await getDocs(q);
                 if (snapshot.empty) return historyList.innerHTML = '<p class="text-gray-600 text-center">কোনো রেকর্ড পাওয়া যায়নি।</p>';
 
@@ -779,193 +798,198 @@
                 }).join('');
                 lucide.createIcons();
             } catch (error) {
-                historyList.innerHTML = '<p class="text-red-600 text-center">হিস্টি লোড করা যায়নি।</p>';
+                historyList.innerHTML = '<p class="text-red-600 text-center">হিস্ট্রি লোড করা যায়নি।</p>';
             }
         }
-
-        async function getStockCount(collectionName) {
-            try {
-                const q = query(collection(db, collectionName), where("isSold", "==", false));
-                const snapshot = await getCountFromServer(q);
-                return snapshot.data().count;
-            } catch (error) {
-                console.error(`Error getting stock count for ${collectionName}:`, error);
-                return 0;
-            }
+        
+        // --- DOLLAR BUY/SELL PAGE FUNCTIONS ---
+        
+        function loadDollarBuySellPage() {
+            document.getElementById('buy-rate-display').textContent = `৳${DOLLAR_BUY_RATE.toFixed(2)}`;
+            document.getElementById('sell-rate-display').textContent = `৳${DOLLAR_SELL_RATE.toFixed(2)}`;
+            setupDollarPageEventListeners();
+            loadTransactionHistory();
         }
+        
+        function setupDollarPageEventListeners() {
+            const buyTab = document.getElementById('dollar-buy-tab');
+            const sellTab = document.getElementById('dollar-sell-tab');
+            const buyForm = document.getElementById('buy-dollar-form');
+            const sellForm = document.getElementById('sell-dollar-form');
 
-        async function loadPostStore() {
-            const postListEl = document.getElementById('post-list');
-            const historyListEl = document.getElementById('post-purchase-history');
-            postListEl.innerHTML = getLoadingHTML();
-            historyListEl.innerHTML = getLoadingHTML();
+            buyTab.addEventListener('click', () => {
+                buyTab.classList.add('active');
+                sellTab.classList.remove('active');
+                buyForm.classList.remove('hidden');
+                sellForm.classList.add('hidden');
+            });
+
+            sellTab.addEventListener('click', () => {
+                sellTab.classList.add('active');
+                buyTab.classList.remove('active');
+                sellForm.classList.remove('hidden');
+                buyForm.classList.add('hidden');
+            });
             
-            try {
-                // The config still uses 'mails', we adapt on the frontend
-                const stockPromises = (appConfig.mails || []).map(item => getStockCount(item.stockKey));
-                const stockCounts = await Promise.all(stockPromises);
-                let itemsWithStock = (appConfig.mails || []).map((item, index) => ({ ...item, stock: stockCounts[index] }));
-                itemsWithStock.sort((a, b) => b.stock - a.stock);
+            const buyAmountInput = document.getElementById('buy-amount-usd');
+            const buyTotalDisplay = document.getElementById('buy-total-bdt');
+            buyAmountInput.addEventListener('input', () => {
+                const amount = parseFloat(buyAmountInput.value) || 0;
+                buyTotalDisplay.textContent = `৳${(amount * DOLLAR_BUY_RATE).toFixed(2)}`;
+            });
+            
+            const sellAmountInput = document.getElementById('sell-amount-usd');
+            const sellTotalDisplay = document.getElementById('sell-total-bdt');
+            sellAmountInput.addEventListener('input', () => {
+                const amount = parseFloat(sellAmountInput.value) || 0;
+                sellTotalDisplay.textContent = `৳${(amount * DOLLAR_SELL_RATE).toFixed(2)}`;
+            });
+            
+            document.getElementById('submit-buy-request-btn').addEventListener('click', handleBuyRequest);
+            document.getElementById('submit-sell-request-btn').addEventListener('click', handleSellRequest);
+        }
 
-                postListEl.innerHTML = '';
-                itemsWithStock.forEach(item => {
-                    const stock = item.stock;
-                    const costInBdt = item.priceBdt;
-                    const isOutOfStock = stock === 0;
-                    const insufficientBalance = userData.balance < costInBdt;
-                    const buyButtonDisabled = isOutOfStock || insufficientBalance ? 'disabled' : '';
-                    const buyButtonClasses = isOutOfStock || insufficientBalance ? 'bg-gray-400 cursor-not-allowed' : 'btn-gradient';
-                    
-                    postListEl.innerHTML += `<div class="card-bg p-4 space-y-3"><div class="flex justify-between items-start"><div class="flex items-center gap-3"><img src="${item.logoUrl}" class="w-10 h-10 rounded-lg object-cover" alt="${item.type} logo"><h3 class="font-bold text-lg text-gray-800">${item.type}</h3></div><div class="text-right"><p class="font-bold text-lg text-indigo-600">৳${costInBdt.toFixed(2)}</p><p class="text-xs text-green-600 font-medium">In Stock: ${stock}</p></div></div><div class="flex items-center justify-between pt-2 border-t border-gray-200"><button onclick="showPostDetails('${item.type}', '${item.details.replace(/'/g, "\\'")}')" class="text-sm font-medium text-indigo-600 hover:underline">Details</button><button class="${buyButtonClasses} px-6 py-2 rounded-lg text-sm" ${buyButtonDisabled} onclick="buyPost('${item.type}', ${costInBdt}, '${item.stockKey}')">Buy Now</button></div></div>`;
-                });
-
-                const q = query(collection(db, "mail_purchases"), where("userId", "==", userData.tgChatId), orderBy("purchasedAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                if(querySnapshot.empty) {
-                    historyListEl.innerHTML = '<p class="text-center text-gray-600">আপনি এখনো কোনো পোস্ট কিনেননি।</p>';
-                } else {
-                    historyListEl.innerHTML = querySnapshot.docs.map(doc => {
-                        const purchase = doc.data();
-                        const date = purchase.purchasedAt.toDate().toLocaleString();
-                        const fullData = [purchase.mail, purchase.password, purchase.refreshToken, purchase.clientId].filter(Boolean).join('|');
-
-                        return `<div class="card-bg p-4 space-y-3">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h4 class="font-bold text-lg text-gray-800">${purchase.mailType}</h4>
-                                    <p class="text-xs text-gray-500">${date}</p>
-                                </div>
-                                <button onclick="copyToClipboard('${fullData}', this)" class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-md font-semibold hover:bg-gray-200 flex items-center gap-1"><i data-lucide="copy" class="w-3 h-3"></i> COPY</button>
-                            </div>
-                            <div class="space-y-2 pt-2 border-t">
-                                <div class="flex items-center justify-between bg-gray-50 p-2 rounded-md"><span class="text-sm font-medium text-gray-500 mr-2">EMAIL:</span><span class="font-mono text-sm text-gray-800 truncate">${purchase.mail}</span><button onclick="copyToClipboard('${purchase.mail}', this)" class="ml-2 p-1.5 rounded-md hover:bg-gray-200"><i data-lucide="copy" class="w-4 h-4 text-gray-600"></i></button></div>
-                                <div class="flex items-center justify-between bg-gray-50 p-2 rounded-md"><span class="text-sm font-medium text-gray-500 mr-2">PASS:</span><span class="font-mono text-sm text-gray-800">${purchase.password || 'N/A'}</span><button onclick="copyToClipboard('${purchase.password || ''}', this)" class="ml-2 p-1.5 rounded-md hover:bg-gray-200"><i data-lucide="copy" class="w-4 h-4 text-gray-600"></i></button></div>
-                            </div>
-                        </div>`;
-                    }).join('');
-                }
-                
-                lucide.createIcons();
-
-                if (insufficientBalanceInterval) {
-                    clearInterval(insufficientBalanceInterval);
-                    insufficientBalanceInterval = null;
-                }
-                const hasSufficientBalanceForAny = itemsWithStock.some(item => userData.balance >= item.priceBdt && item.stock > 0);
-                const hasAnyStock = itemsWithStock.some(item => item.stock > 0);
-                if (!hasSufficientBalanceForAny && hasAnyStock) {
-                    insufficientBalanceInterval = setInterval(() => {
-                        const isAnyModalOpen = document.querySelector('.modal-container:not(.hidden)');
-                        if (!isAnyModalOpen) {
-                            document.getElementById('insufficient-balance-modal').classList.remove('hidden');
-                            lucide.createIcons();
-                        }
-                    }, 30000);
-                }
-
-            } catch(e) {
-                 postListEl.innerHTML = '<p class="text-center text-red-600">পোস্ট লোড করা যায়নি।</p>';
-                 historyListEl.innerHTML = '<p class="text-center text-red-600">হিস্টি লোড করা যায়নি।</p>';
-                 console.error(e);
+        async function handleBuyRequest() {
+            const amountUsd = parseFloat(document.getElementById('buy-amount-usd').value);
+            const binanceId = document.getElementById('buy-binance-id').value.trim();
+            
+            if (isNaN(amountUsd) || amountUsd <= 0 || !binanceId) {
+                return showAlert("Please enter a valid amount and your Binance Pay ID.");
             }
-        }
-        
-        async function handleDownloadHistory() {
-            loader.style.display = 'flex';
-            try {
-                const q = query(collection(db, "mail_purchases"), where("userId", "==", userData.tgChatId), orderBy("purchasedAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) { 
-                    loader.style.display = 'none';
-                    return showAlert("আপনার কোনো History নেই"); 
-                }
-                
-                const dataForExcel = querySnapshot.docs.map(doc => { const p = doc.data(); return { 'Purchase Date': p.purchasedAt.toDate().toLocaleString(), 'Post Type': p.mailType, 'Email': p.mail, 'Password': p.password || 'N/A', 'Cost (BDT)': p.cost, 'Full Data': [p.mail,p.password,p.refreshToken,p.clientId].filter(Boolean).join('|') }; });
-                const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Purchase History");
-                worksheet['!cols'] = [ {wch: 22}, {wch: 20}, {wch: 30}, {wch: 30}, {wch: 15}, {wch: 70} ];
-                XLSX.writeFile(workbook, "My_Purchase_History.xlsx");
-            } catch (error) { showAlert("ইতিহাস ডাউনলোড করার সময় একটি সমস্যা হয়েছে।"); } 
-            finally { loader.style.display = 'none'; }
-        }
-        
-        async function handleCopyHistory() {
-             loader.style.display = 'flex';
-            try {
-                const q = query(collection(db, "mail_purchases"), where("userId", "==", userData.tgChatId), orderBy("purchasedAt", "desc"));
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) {
-                    loader.style.display = 'none';
-                    return showAlert("আপনার কোনো History নেই");
-                }
-                
-                const header = "Purchase Date\tPost Type\tEmail\tPassword\tCost (BDT)\tFull Data";
-                const rows = querySnapshot.docs.map(doc => {
-                    const p = doc.data();
-                    const fullData = [p.mail, p.password, p.refreshToken, p.clientId].filter(Boolean).join('|');
-                    return [ p.purchasedAt.toDate().toLocaleString(), p.mailType, p.mail, p.password || 'N/A', p.cost, fullData ].join('\t');
-                });
-                
-                const tsvContent = [header, ...rows].join('\n');
-                copyToClipboard(tsvContent, null);
-
-            } catch (error) { showAlert("ইতিহাস কপি করার সময় একটি সমস্যা হয়েছে।"); } 
-            finally { loader.style.display = 'none'; }
-        }
-
-        window.buyPost = async function(postType, cost, stockKey) {
-            if (userData.balance < cost) {
+            
+            const totalCostBdt = amountUsd * DOLLAR_BUY_RATE;
+            
+            if (userData.balance < totalCostBdt) {
                 document.getElementById('insufficient-balance-modal').classList.remove('hidden');
                 lucide.createIcons();
                 return;
             }
-
-            if (!confirm(`আপনি কি ৳${cost.toFixed(2)} দিয়ে একটি ${postType} কিনতে চান?`)) return;
-
+            
+            if (!confirm(`You are about to request to buy ${amountUsd} USDT for ৳${totalCostBdt.toFixed(2)}. This amount will be deducted from your balance. Continue?`)) {
+                return;
+            }
+            
             loader.style.display = 'flex';
             try {
-                const purchasedItemData = await runTransaction(db, async (transaction) => {
-                    const counterRef = doc(db, "counters", "mail_purchase"); // Keep backend name same for now
-                    const q = query(collection(db, stockKey), where("isSold", "==", false), limit(1));
-                    const itemQuerySnapshot = await getDocs(q);
-                    if (itemQuerySnapshot.empty) throw "দুঃখিত, এই ধরনের পোস্ট বর্তমানে স্টক শেষ।";
-                    
-                    const itemDoc = itemQuerySnapshot.docs[0];
-                    const itemData = itemDoc.data();
+                await runTransaction(db, async (transaction) => {
                     const userRef = doc(db, "users", userData.tgChatId);
-                    const [counterSnap, userSnap] = await Promise.all([ transaction.get(counterRef), transaction.get(userRef) ]);
+                    const userDoc = await transaction.get(userRef);
                     
-                    if (!userSnap.exists() || userSnap.data().balance < cost) throw `অপর্যাপ্ত ব্যালেন্স।`;
-                    if (!counterSnap.exists()) throw "Sale ID counter not found.";
-        
-                    const saleId = counterSnap.data().currentId;
-                    transaction.update(counterRef, { currentId: saleId + 1 });
-                    transaction.update(userRef, { balance: userSnap.data().balance - cost });
-                    transaction.update(itemDoc.ref, { isSold: true, soldTo: userData.tgChatId, soldAt: serverTimestamp() });
+                    if (!userDoc.exists() || userDoc.data().balance < totalCostBdt) {
+                        throw "Insufficient balance. Please deposit more funds.";
+                    }
                     
-                    const purchaseLogRef = doc(collection(db, "mail_purchases"));
-                    transaction.set(purchaseLogRef, { 
-                        saleId: saleId, userId: userData.tgChatId, mailType: postType, 
-                        mail: itemData.email, password: itemData.password || null, 
-                        refreshToken: itemData.refresh_token || null, clientId: itemData.client_id || null,
-                        cost: cost, purchasedAt: serverTimestamp() 
+                    transaction.update(userRef, { balance: userDoc.data().balance - totalCostBdt });
+                    
+                    const transactionRef = doc(collection(db, "dollar_transactions"));
+                    transaction.set(transactionRef, {
+                        userId: userData.tgChatId,
+                        userName: userData.name,
+                        type: 'buy',
+                        amountUsd: amountUsd,
+                        rate: DOLLAR_BUY_RATE,
+                        amountBdt: totalCostBdt,
+                        binanceId: binanceId,
+                        status: 'pending',
+                        requestedAt: serverTimestamp()
                     });
-                    return itemData;
                 });
-
-                userData.balance -= cost; 
+                
+                userData.balance -= totalCostBdt;
                 updateUI();
-                showAlert(`সফলভাবে কেনা হয়েছে!\n\nEmail: ${purchasedItemData.email}\nPassword: ${purchasedItemData.password || 'N/A'}\n\nএই তথ্য আপনার ক্রয় হিস্টিতে সেভ করা হয়েছে।`);
-                loadPostStore(); 
-            } catch (e) { showAlert(typeof e === 'string' ? e : "কিনতে সমস্যা হয়েছে। আবার চেষ্টা করুন।"); } 
-            finally { loader.style.display = 'none'; }
+                showAlert("Your request to buy USDT has been submitted successfully. Admin will process it shortly.");
+                document.getElementById('buy-amount-usd').value = '';
+                document.getElementById('buy-binance-id').value = '';
+                loadTransactionHistory();
+            } catch (error) {
+                showAlert(typeof error === 'string' ? error : "An error occurred. Please try again.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+        
+        async function handleSellRequest() {
+            const amountUsd = parseFloat(document.getElementById('sell-amount-usd').value);
+            const method = document.getElementById('sell-payment-method').value;
+            const number = document.getElementById('sell-payment-number').value.trim();
+            const txId = document.getElementById('sell-txid').value.trim();
+
+            if (isNaN(amountUsd) || amountUsd <= 0 || !method || !number) {
+                return showAlert("Please fill all required fields correctly.");
+            }
+            
+            const totalBdt = amountUsd * DOLLAR_SELL_RATE;
+            
+            loader.style.display = 'flex';
+            try {
+                await addDoc(collection(db, "dollar_transactions"), {
+                    userId: userData.tgChatId,
+                    userName: userData.name,
+                    type: 'sell',
+                    amountUsd: amountUsd,
+                    rate: DOLLAR_SELL_RATE,
+                    amountBdt: totalBdt,
+                    paymentMethod: method,
+                    paymentNumber: number,
+                    binanceTxId: txId,
+                    status: 'pending',
+                    requestedAt: serverTimestamp()
+                });
+                
+                showAlert("Your request to sell USDT has been submitted. Admin will verify and add the balance to your account.");
+                document.getElementById('sell-amount-usd').value = '';
+                document.getElementById('sell-payment-number').value = '';
+                document.getElementById('sell-txid').value = '';
+                loadTransactionHistory();
+            } catch (error) {
+                showAlert("Failed to submit your request. Please try again.");
+            } finally {
+                loader.style.display = 'none';
+            }
         }
 
-        window.showPostDetails = function(postType, details) {
-            document.getElementById('post-details-title').textContent = `${postType} Details`;
-            document.getElementById('post-details-content').textContent = details;
-            document.getElementById('post-details-modal').classList.remove('hidden');
+        async function loadTransactionHistory() {
+            const historyList = document.getElementById('dollar-history-list');
+            historyList.innerHTML = getLoadingHTML();
+            try {
+                const q = query(collection(db, "dollar_transactions"), where("userId", "==", userData.tgChatId), orderBy("requestedAt", "desc"), limit(10));
+                const snapshot = await getDocs(q);
+                
+                if (snapshot.empty) {
+                    return historyList.innerHTML = '<p class="text-gray-600 text-center">No transaction history found.</p>';
+                }
+                
+                historyList.innerHTML = snapshot.docs.map(doc => {
+                    const item = doc.data();
+                    let statusColor, statusIcon;
+                    switch (item.status) {
+                        case 'approved': statusColor = 'text-green-600'; statusIcon = 'check-circle-2'; break;
+                        case 'rejected': statusColor = 'text-red-600'; statusIcon = 'x-circle'; break;
+                        default: statusColor = 'text-yellow-600'; statusIcon = 'hourglass';
+                    }
+                    const isBuy = item.type === 'buy';
+                    const title = isBuy ? `Buy ${item.amountUsd} USDT` : `Sell ${item.amountUsd} USDT`;
+                    const date = item.requestedAt ? item.requestedAt.toDate().toLocaleDateString('en-GB') : 'N/A';
+                    
+                    return `<div class="card-bg p-3 rounded-lg flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="${statusIcon}" class="w-6 h-6 ${statusColor}"></i>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">${title}</p>
+                                        <p class="text-xs text-gray-500">${date}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold text-lg ${isBuy ? 'text-red-600' : 'text-green-600'}">${isBuy ? '-' : '+'}৳${item.amountBdt.toFixed(2)}</p>
+                                    <p class="font-semibold ${statusColor} capitalize text-xs">${item.status}</p>
+                                </div>
+                            </div>`;
+                }).join('');
+                lucide.createIcons();
+            } catch (error) {
+                console.error("Error loading transaction history: ", error);
+                historyList.innerHTML = '<p class="text-red-600 text-center">Could not load history.</p>';
+            }
         }
         
         async function loadUpdates() {
@@ -993,26 +1017,18 @@
         
         window.copyToClipboard = function(text, element) {
             if (!text || typeof text !== 'string') return;
-            const textArea = document.createElement("textarea");
-            textArea.value = text.trim();
-            textArea.style.position = 'fixed';
-            textArea.style.top = '-9999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                if (document.execCommand('copy')) {
-                    if (element) {
-                        const originalContent = element.innerHTML;
-                        element.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-green-600"></i>`;
-                        lucide.createIcons();
-                        setTimeout(() => { element.innerHTML = originalContent; lucide.createIcons(); }, 1500);
-                    } else {
-                        showAlert('কপি করা হয়েছে!');
-                    }
+            navigator.clipboard.writeText(text.trim()).then(() => {
+                if (element) {
+                    const originalContent = element.innerHTML;
+                    element.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-green-600"></i>`;
+                    lucide.createIcons();
+                    setTimeout(() => { element.innerHTML = originalContent; lucide.createIcons(); }, 1500);
+                } else {
+                    showAlert('কপি করা হয়েছে!');
                 }
-            } catch (err) { showAlert('দুঃখিত, কপি করা যায়নি।'); }
-            document.body.removeChild(textArea);
+            }).catch(err => {
+                showAlert('দুঃখিত, কপি করা যায়নি।');
+            });
         }
         
         function setupBanner() {
@@ -1022,7 +1038,7 @@
             if (slides.length <= 1) return;
             let index = 0;
             dotsContainer.innerHTML = Array.from(slides).map((_, i) => `<span class="inline-block h-2 w-2 m-1 rounded-full cursor-pointer transition-all ${i === 0 ? 'active w-4 bg-white' : 'bg-white/50'}" data-index="${i}"></span>`).join('');
-            const dots = dotsContainer.querySelectorAll('span'); // Changed from .dot to span
+            const dots = dotsContainer.querySelectorAll('span');
             function showSlide(i) {
                 index = i;
                 slideContainer.style.transform = `translateX(${-i * 100}%)`;
@@ -1074,7 +1090,7 @@
                     return `<div class="card-bg p-3 rounded-lg flex items-center justify-between"><div><p class="font-semibold text-gray-800">${isSent ? `Sent to ${item.toName}` : `Received from ${item.fromName}`}</p><p class="text-xs text-gray-500">${item.timestamp.toDate().toLocaleString('en-GB')}</p></div><p class="font-bold text-lg ${isSent ? 'text-red-600' : 'text-green-600'}">${isSent ? '-' : '+'}৳${(isSent ? item.totalDeducted : item.amount).toFixed(2)}</p></div>`;
                 }).join('');
             } catch (e) {
-                historyList.innerHTML = '<p class="text-red-600 text-center">হিস্টি লোড করা যায়নি।</p>';
+                historyList.innerHTML = '<p class="text-red-600 text-center">হিস্ট্রি লোড করা যায়নি।</p>';
             }
         }
 
