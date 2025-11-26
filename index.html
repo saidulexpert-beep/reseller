@@ -3,1274 +3,819 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAIL SHOP</title>
-    
+    <title>𝐌𝐀𝐈𝐋 𝐒𝐓𝐎𝐑𝐄 𝐏𝐑𝐎</title>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root {
-            --bg-color: #f4f7fa;
-            --card-bg-color: #ffffff;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --accent-start: #4f46e5;
-            --accent-end: #7c3aed;
-            --border-color: #e5e7eb;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+        input, textarea, .selectable-text {
+            -webkit-user-select: text;
+            user-select: text;
         }
         
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            -webkit-tap-highlight-color: transparent;
+        /* Premium Header Styles */
+        .header-premium {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
         }
-        .card-bg { 
-            background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 16px;
+
+        .balance-pill {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            padding: 6px 16px;
+            border-radius: 9999px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.2s;
         }
-        .card-bg:hover {
-            border-color: rgba(79, 70, 229, 0.4);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            transform: translateY(-2px);
-        }
-        .text-accent-gradient {
-            background: linear-gradient(to right, var(--accent-start), var(--accent-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .btn, .btn-gradient { 
-            transition: all 0.2s ease-in-out; 
-            transform: scale(1); 
+        .balance-pill:active { transform: scale(0.95); }
+
+        .header-icon-btn {
+            padding: 8px;
             border-radius: 12px;
-            font-weight: 600;
-            border: none;
+            background: white;
+            color: #4b5563;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
         }
-        .btn:active, .btn-gradient:active { transform: scale(0.97); }
-        .btn-gradient { 
-            background-image: linear-gradient(to right, var(--accent-start), var(--accent-end));
-            color: #ffffff; 
-            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
-        }
-        .btn-gradient:hover { 
-            box-shadow: 0 7px 25px rgba(79, 70, 229, 0.35);
-            background-image: linear-gradient(to right, var(--accent-end), var(--accent-start));
-        }
-        .input-field { 
-            background-color: #f9fafb;
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            transition: all 0.2s ease;
-            border-radius: 12px;
-        }
-        .input-field:focus {
-            border-color: var(--accent-start);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-            outline: none;
+        .header-icon-btn:active { background: #f3f4f6; transform: scale(0.95); }
+
+        /* Card & UI Styles */
+        .card-bg {
             background-color: #ffffff;
+            border: 1px solid #f0f0f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .main-page { display: none; }
-        .main-page.active { display: flex; animation: fadeIn 0.5s ease-in-out; }
-        .sub-page { display: none; }
-        .sub-page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        
+        .btn-gradient {
+            background-image: linear-gradient(to right, #2563eb, #0ea5e9);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s;
+        }
+        .btn-gradient:active { transform: scale(0.98); }
+
+        .tab-active {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-color: #2563eb;
+        }
+        .tab-inactive {
+            background-color: transparent;
+            color: #6b7280;
+            border-color: transparent;
+        }
+
+        /* Nav Styles */
         .bottom-nav {
-             border-top: 1px solid var(--border-color);
-             background-color: rgba(255, 255, 255, 0.85);
-             backdrop-filter: blur(12px);
-             -webkit-backdrop-filter: blur(12px);
+             border-top: 1px solid #f3f4f6;
+             background-color: rgba(255, 255, 255, 0.95);
+             backdrop-filter: blur(10px);
              position: fixed;
              bottom: 0;
              left: 0;
              right: 0;
-             max-width: 672px;
+             max-width: 448px;
              margin: 0 auto;
+             display: flex;
+             justify-content: space-around;
+             padding: 10px 0;
              z-index: 50;
+             box-shadow: 0 -4px 20px rgba(0,0,0,0.02);
         }
-        .nav-link-premium { 
-            display: flex; flex-direction: column; align-items: center; 
-            gap: 4px; color: var(--text-secondary); font-size: 0.75rem; 
-            font-weight: 500; padding: 8px; border-radius: 12px; 
-            transition: all 0.2s ease; position: relative; cursor: pointer; 
-            background: none; border: none; width: 64px;
+        .nav-link-native {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #9ca3af;
+            font-size: 0.7rem;
+            font-weight: 600;
+            width: 70px;
+            transition: color 0.2s;
         }
-        .nav-link-premium:hover { color: var(--text-primary); }
-        .nav-link-premium.active { color: var(--accent-start); font-weight: 600; }
-        .nav-link-premium .icon { width: 24px; height: 24px; }
-        .center-home-link { 
-            position: relative; transform: translateY(-24px) scale(1.1); 
-            background-image: linear-gradient(to bottom right, var(--accent-start), var(--accent-end)); 
-            border: 2px solid #fff;
-            border-radius: 50%; width: 64px; height: 64px; display: flex; 
-            align-items: center; justify-content: center; 
-            box-shadow: 0 6px 25px rgba(79, 70, 229, 0.4); 
-            transition: all 0.3s ease;
-        }
-        .center-home-link:hover { transform: translateY(-24px) scale(1.18); }
-        .center-home-link .icon { width: 32px; height: 32px; color: #fff; }
-        .header { 
-            border-bottom: 1px solid var(--border-color); 
-            background-color: rgba(255, 255, 255, 0.8); 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px); 
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-link-native.active { color: #2563eb; }
+        .nav-link-native .icon { width: 24px; height: 24px; }
 
-        #loader {
-            display: flex; flex-direction: column; justify-content: center; 
-            align-items: center; background-color: var(--bg-color);
-            transition: opacity 0.5s ease;
-        }
-        .loader-spinner {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            background: conic-gradient(#0000 10%, var(--accent-start));
-            -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 9px), #000 0);
-            animation: spin 1s infinite linear;
-            margin-bottom: 1.5rem;
-        }
-        .loader-text {
-            font-weight: 800; font-size: 1.75rem;
-            animation: fadeInText 1s ease-in-out 0.5s forwards; opacity: 0;
-        }
-        @keyframes spin { to { transform: rotate(1turn); } }
-        @keyframes fadeInText { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Helpers */
+        .main-page { display: none; }
+        .main-page.active { display: flex; animation: fadeIn 0.4s ease-out; }
+        .sub-page { display: none; }
+        .sub-page.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        .fab-button {
-            position: fixed; bottom: 100px; width: 56px; height: 56px;
-            border-radius: 18px; display: flex; align-items: center; justify-content: center;
-            color: white; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); z-index: 40;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform: scale(0) rotate(-45deg);
-        }
-        .fab-button.visible { transform: scale(1) rotate(0deg); }
-        .fab-updates { left: 24px; background-color: #3b82f6; }
-        .fab-telegram { right: 24px; background-color: #25a3e2; }
-        .fab-whatsapp { right: 24px; background: #25d366; }
+        #loader { position: fixed; inset: 0; background: #f3f4f6; z-index: 100; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
-        .modal-container {
-             position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.7);
-             display: flex; items-center; justify-content: center; z-index: 70;
-             padding: 1rem; backdrop-filter: blur(8px);
-             opacity: 0; visibility: hidden; transition: all 0.3s ease;
-        }
-        .modal-container:not(.hidden) { opacity: 1; visibility: visible; }
-        .modal-content {
-            background-color: var(--card-bg-color); border-radius: 20px;
-            padding: 1.5rem; width: 100%; max-width: 24rem; text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transform: scale(0.95); transition: transform 0.3s ease;
-        }
-        .modal-container:not(.hidden) .modal-content { transform: scale(1); }
-        .dollar-tab-btn {
-            flex: 1; padding: 12px; font-weight: 600; color: var(--text-secondary);
-            border-bottom: 3px solid transparent; transition: all 0.3s;
-        }
-        .dollar-tab-btn.active {
-            color: var(--accent-start);
-            border-bottom-color: var(--accent-start);
-        }
+        .full-screen-page { position: fixed; inset: 0; background: #f9fafb; z-index: 90; overflow-y: auto; padding-bottom: 80px; }
+        .notif-badge { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none; }
     </style>
 </head>
-<body class="max-w-md mx-auto">
+<body class="max-w-md mx-auto text-sm">
 
-    <div id="loader" class="fixed inset-0 flex items-center justify-center z-[100]">
-        <div class="text-center">
-            <div class="loader-spinner"></div>
-            <h1 class="text-accent-gradient loader-text">MAIL SHOP</h1>
-        </div>
-    </div>
-
-    <div id="app-container" class="min-h-screen flex-col main-page">
-        <header class="header flex items-center justify-between p-4 sticky top-0 z-10">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                    <i data-lucide="mail" class="text-[var(--accent-start)]"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-accent-gradient">MAIL SHOP</h1>
-                    <p id="header-user-greeting" class="text-xs text-gray-500">Welcome back!</p>
-                </div>
-            </div>
-            <button id="header-deposit-btn" class="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-full text-sm font-semibold hover:bg-indigo-100 transition-colors">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                <span id="header-balance-display">৳0.00</span>
-            </button>
-        </header>
-
-        <main class="flex-grow pb-24">
-            <div id="home-page" class="space-y-6 sub-page p-4">
-                <div class="card-bg p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <p class="text-gray-500 text-sm font-medium">Your Current Balance</p>
-                        <i data-lucide="wallet" class="w-6 h-6 text-gray-400"></i>
-                    </div>
-                    <p id="balance-display" class="text-5xl font-extrabold text-gray-800">৳0.00</p>
-                    <div class="grid grid-cols-2 gap-3 pt-2">
-                        <button id="home-deposit-btn" class="w-full p-3 rounded-xl btn-gradient flex items-center justify-center gap-2">
-                            <i data-lucide="arrow-down-to-line" class="w-5 h-5"></i><span>Deposit</span>
-                        </button>
-                        <button onclick="navigateTo('dollar-page')" class="w-full p-3 rounded-xl bg-gray-100 text-gray-800 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                            <i data-lucide="dollar-sign" class="w-5 h-5"></i><span>Dollar</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="relative w-full pt-[50%] rounded-2xl overflow-hidden shadow-lg">
-                    <div class="absolute top-0 left-0 w-full h-full flex transition-transform duration-700 ease-in-out" id="slides">
-                        <div class="min-w-full"><a href="https://t.me/EXPERTearn_team" target="_blank"><img src="https://i.postimg.cc/zBp8rCX9/Yellow-Orange-Modern-Marketing-Courses-You-Tube-Thumbnail-20250910-185659-0000.png" alt="Slide 1" class="w-full h-full object-cover"></a></div>
-                        <div class="min-w-full"><a href="https://t.me/EXPERTearn_team" target="_blank"><img src="https://i.postimg.cc/W1syFD8p/Grey-Blue-Illustration-Refer-a-Friend-Instagram-Post-1080-x-720-px-20250917-223749-0000.png" alt="Slide 2" class="w-full h-full object-cover"></a></div>
-                        <div class="min-w-full"><a href="https://t.me/EXPERTearn_team" target="_blank"><img src="https://i.postimg.cc/52HsFwvV/Black-and-Orange-Money-You-Tube-Thumbnail-20250917-224706-0000.png" alt="Slide 3" class="w-full h-full object-cover"></a></div>
-                    </div>
-                    <div class="dots absolute bottom-3 w-full text-center z-10" id="dots"></div>
-                </div>
-
-                <div class="mt-8">
-                    <h3 class="text-2xl font-bold text-center mb-4 text-gray-800">Customer Reviews</h3>
-                    <div id="reviews-list" class="space-y-4"></div>
-                </div>
-            </div>
-            
-            <div id="pay-page" class="p-4 space-y-6 sub-page">
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold text-gray-800">Deposit Center</h2>
-                    <p class="text-gray-500">আপনার অ্যাকাউন্টে ব্যালেন্স যোগ করুন</p>
-                </div>
-                <div class="card-bg p-5 space-y-6">
-                    <div>
-                        <p class="text-lg font-semibold text-gray-700 mb-4 text-center p-3 rounded-xl border border-dashed border-indigo-500/50 bg-indigo-500/10">নিচের নম্বরে <span class="text-indigo-600 font-bold">সেন্ডমানি</span> করুন</p>
-                        <div class="grid grid-cols-2 gap-4 mb-5">
-                            <div class="bg-gray-50 p-3 rounded-xl text-center border border-gray-200 space-y-2"><img src="https://i.postimg.cc/Jh9s6jWw/20250922-113350.png" alt="Nagad" class="w-10 h-10 rounded-full mx-auto"><p class="font-bold text-md">নগদ</p><p class="text-gray-600 font-mono tracking-wider text-sm">01864260513</p><button onclick="copyToClipboard('01864260513', this)" class="w-full text-xs p-1.5 mt-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy</span></button></div>
-                            <div class="bg-gray-50 p-3 rounded-xl text-center border border-gray-200 space-y-2"><img src="https://i.postimg.cc/tCwGVkdH/20250922-113514.png" alt="bKash" class="w-10 h-10 rounded-full mx-auto"><p class="font-bold text-md">বিকাশ</p><p class="text-gray-600 font-mono tracking-wider text-sm">01827750260</p><button onclick="copyToClipboard('01827750260', this)" class="w-full text-xs p-1.5 mt-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy</span></button></div>
-                            <div class="bg-gray-50 p-3 rounded-xl text-center border border-gray-200 space-y-2"><img src="https://i.postimg.cc/htsw10Tj/20250922-113924.png" alt="Rocket" class="w-10 h-10 rounded-full mx-auto"><p class="font-bold text-md">রকেট</p><p class="text-gray-600 font-mono tracking-wider text-sm">018277502604</p><button onclick="copyToClipboard('018277502604', this)" class="w-full text-xs p-1.5 mt-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy</span></button></div>
-                            <div class="bg-gray-50 p-3 rounded-xl text-center border border-gray-200 space-y-2"><img src="https://i.postimg.cc/L6LFLfxY/20250922-113752.png" alt="Binance Pay" class="w-10 h-10 rounded-full mx-auto"><p class="font-bold text-md">Binance</p><p class="text-gray-600 font-mono tracking-wider text-sm">1085460262</p><button onclick="copyToClipboard('1085460262', this)" class="w-full text-xs p-1.5 mt-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="copy" class="w-3 h-3"></i><span>Copy ID</span></button></div>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-4 text-center border-t border-gray-200 pt-4">টাকা পাঠানোর পর নিচের ফর্মটি পূরণ করুন:</p>
-                        <div class="space-y-4">
-                             <div><label for="deposit-method" class="block text-sm font-medium text-gray-600 mb-2">পেমেন্ট মাধ্যম</label><select id="deposit-method" class="w-full p-3 input-field"><option value="">কোন মাধ্যমে টাকা পাঠিয়েছেন?</option><option value="Nagad">নগদ</option><option value="bKash">বিকাশ</option><option value="Rocket">রকেট</option><option value="Binance">Binance</option></select></div>
-                            <div><label for="deposit-amount" class="block text-sm font-medium text-gray-600 mb-2">টাকার পরিমাণ (BDT)</label><input id="deposit-amount" type="number" placeholder="e.g., 100" class="w-full p-3 input-field"></div>
-                            <div><label for="sender-number" class="block text-sm font-medium text-gray-600 mb-2">আপনার পেমেন্ট নম্বর/আইডি</label><input id="sender-number" type="text" placeholder="যে নম্বর বা আইডি থেকে টাকা পাঠিয়েছেন" class="w-full p-3 input-field"></div>
-                            <div><label for="deposit-txid" class="block text-sm font-medium text-gray-600 mb-2">Transaction ID (TrxID)</label><input id="deposit-txid" type="text" placeholder="টাকা পাঠানোর পর পাওয়া TrxID" class="w-full p-3 input-field"></div>
-                            <button id="deposit-btn" class="w-full p-3 btn-gradient">Submit Deposit Request</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-6"><h3 class="text-xl font-bold mb-3">Payment History</h3><div id="payment-history-list" class="space-y-3"></div></div>
-            </div>
-
-            <div id="dollar-page" class="p-4 space-y-6 sub-page">
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold text-gray-800">Dollar Buy & Sell</h2>
-                    <p class="text-gray-500">আপনার USDT (BEP20) কিনুন বা বিক্রি করুন</p>
-                </div>
-
-                <div class="card-bg p-1">
-                    <div class="flex">
-                        <button id="dollar-buy-tab" class="dollar-tab-btn active">Buy USDT</button>
-                        <button id="dollar-sell-tab" class="dollar-tab-btn">Sell USDT</button>
-                    </div>
-                </div>
-
-                <div id="buy-dollar-form" class="card-bg p-5 space-y-5">
-                    <div class="text-center bg-indigo-50 p-3 rounded-lg">
-                        <p class="font-bold text-lg text-indigo-700">Buy Rate: <span id="buy-rate-display">৳0.00</span> / USDT</p>
-                        <p class="text-xs text-indigo-500">আপনার অ্যাপ ব্যালেন্স ব্যবহার করে USDT কিনুন</p>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="buy-amount-usd" class="block text-sm font-medium text-gray-600 mb-2">Amount you want to buy (USDT)</label>
-                            <input id="buy-amount-usd" type="number" placeholder="e.g., 10" class="w-full p-3 input-field">
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Total Cost (BDT)</p>
-                            <p id="buy-total-bdt" class="text-2xl font-bold text-gray-800 p-3 bg-gray-50 rounded-lg text-center">৳0.00</p>
-                        </div>
-                        <div>
-                            <label for="buy-binance-id" class="block text-sm font-medium text-gray-600 mb-2">Your Binance Pay ID</label>
-                            <input id="buy-binance-id" type="text" placeholder="Enter your Pay ID" class="w-full p-3 input-field">
-                        </div>
-                        <button id="submit-buy-request-btn" class="w-full p-3 btn-gradient">Request to Buy USDT</button>
-                    </div>
-                </div>
-
-                <div id="sell-dollar-form" class="card-bg p-5 space-y-5 hidden">
-                     <div class="text-center bg-green-50 p-3 rounded-lg">
-                        <p class="font-bold text-lg text-green-700">Sell Rate: <span id="sell-rate-display">৳0.00</span> / USDT</p>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-xl text-center border border-gray-200 space-y-2">
-                        <p class="font-bold text-md">আমাদের Binance Pay ID</p>
-                        <p class="text-gray-600 font-mono tracking-wider text-lg">1085460262</p>
-                        <button onclick="copyToClipboard('1085460262', this)" class="w-full text-sm p-2 mt-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5"><i data-lucide="copy" class="w-4 h-4"></i><span>Copy ID</span></button>
-                        <p class="text-xs text-red-600 pt-2">উপরের আইডিতে USDT পাঠানোর পর নিচের ফর্মটি পূরণ করুন।</p>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <label for="sell-amount-usd" class="block text-sm font-medium text-gray-600 mb-2">Amount you sold (USDT)</label>
-                            <input id="sell-amount-usd" type="number" placeholder="e.g., 10" class="w-full p-3 input-field">
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">You will receive (BDT)</p>
-                            <p id="sell-total-bdt" class="text-2xl font-bold text-gray-800 p-3 bg-gray-50 rounded-lg text-center">৳0.00</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="sell-payment-method" class="block text-sm font-medium text-gray-600 mb-2">Receive Method</label>
-                                <select id="sell-payment-method" class="w-full p-3 input-field">
-                                    <option value="bKash">বিকাশ</option>
-                                    <option value="Nagad">নগদ</option>
-                                    <option value="Rocket">রকেট</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="sell-payment-number" class="block text-sm font-medium text-gray-600 mb-2">Payment Number</label>
-                                <input id="sell-payment-number" type="text" placeholder="Your number" class="w-full p-3 input-field">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="sell-txid" class="block text-sm font-medium text-gray-600 mb-2">Binance Transaction ID (Optional)</label>
-                            <input id="sell-txid" type="text" placeholder="Paste transaction hash here" class="w-full p-3 input-field">
-                        </div>
-                        <button id="submit-sell-request-btn" class="w-full p-3 btn-gradient">Request to Sell USDT</button>
-                    </div>
-                </div>
-
-                <div class="mt-6">
-                    <h3 class="text-xl font-bold mb-3">Transaction History</h3>
-                    <div id="dollar-history-list" class="space-y-3"></div>
-                </div>
-            </div>
-
-            <div id="updates-page" class="p-4 space-y-6 sub-page">
-                <div class="space-y-4">
-                     <a href="https://t.me/BestMarketMain" target="_blank" class="w-full p-4 rounded-xl flex justify-between items-center text-left text-lg font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-colors">
-                        <div class="flex items-center gap-3"><i data-lucide="send" class="w-6 h-6"></i><span>𝐎𝐅𝐅𝐈𝐂𝐈𝐀𝐋 𝐂𝐇𝐀𝐍𝐍𝐄𝐋</span></div><i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    </a>
-                </div>
-                <h2 class="text-2xl font-bold text-center text-gray-800 pt-4">Latest Updates</h2>
-                <div id="updates-content" class="space-y-4"></div>
-            </div>
-            
-            <div id="tutorial-page" class="p-4 space-y-6 sub-page">
-                <div class="text-center">
-                    <h2 class="text-2xl font-bold text-gray-800">Tutorials</h2>
-                    <p class="text-gray-500">নিচের তালিকা থেকে আপনার প্রয়োজনীয় ভিডিওটি দেখুন।</p>
-                </div>
-                <div id="tutorial-list" class="space-y-5"></div>
-            </div>
-
-            <div id="profile-page" class="p-4 space-y-6 sub-page">
-                <div class="card-bg p-6 flex flex-col items-center text-center">
-                    <div class="relative mb-4">
-                        <img id="profile-pic" class="w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover hidden" src="" alt="Profile Picture">
-                        <div id="profile-initials-avatar" class="w-28 h-28 rounded-full bg-indigo-100 flex items-center justify-center border-4 border-white shadow-lg"><span id="profile-initials" class="text-4xl font-bold text-indigo-500"></span></div>
-                    </div>
-                    <h3 id="profile-name" class="text-2xl font-bold text-gray-800">Loading...</h3>
-                    <p id="profile-username" class="text-gray-500">@username</p>
-                    <p id="profile-id" class="text-sm text-gray-600 mt-2 bg-gray-100 px-3 py-1 rounded-full">ID: 123456</p>
-                </div>
-
-                <div class="space-y-3">
-                    <button id="more-features-btn" class="w-full card-bg p-4 rounded-xl flex justify-between items-center text-left text-lg font-semibold">
-                        <div class="flex items-center gap-3"><i data-lucide="sparkles" class="w-6 h-6 text-indigo-500"></i><span>More Features</span></div>
-                        <i data-lucide="arrow-right" class="w-5 h-5 text-gray-400"></i>
-                    </button>
-                    <a href="https://t.me/earn_Supportbot" target="_blank" class="w-full card-bg p-4 rounded-xl flex justify-between items-center text-left text-lg font-semibold">
-                        <div class="flex items-center gap-3"><i data-lucide="message-square" class="w-6 h-6 text-green-500"></i><span>Support Team</span></div>
-                        <i data-lucide="arrow-up-right" class="w-5 h-5 text-gray-600"></i>
-                    </a>
-                </div>
-
-                <div class="card-bg p-4">
-                    <h3 class="text-md font-semibold text-gray-700 mb-4 text-center">Follow Us On</h3>
-                    <div class="flex justify-center items-center space-x-6">
-                       <a href="https://youtube.com/@saidulexpert?si=cT6fpmM13Qh7m2Zc" target="_blank" class="text-gray-600 hover:text-red-600 transition-transform hover:scale-110"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-                       <a href="https://t.me/SAIDULHP" target="_blank" class="text-gray-600 hover:text-sky-500 transition-transform hover:scale-110"><svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.65 12c-.88-.25-.89-1.02.2-1.3l15.67-6.11c.8-.32 1.45.19 1.18 1.1l-2.53 11.64c-.23.95-1.17 1.17-1.87.73l-4.5-3.33-2.15 2.07c-.24.24-.45.46-.8.46-.42 0-.59-.16-.69-.53z"/></svg></a>
-                       <a href="http://tiktok.com/@saidulexpert" target="_blank" class="text-gray-600 hover:text-black transition-transform hover:scale-110"><img src="https://i.postimg.cc/hPdCfhKD/download.png" alt="TikTok" class="w-8 h-8"></a>
-                    </div>
-                </div>
-                
-                <div class="mt-6">
-                    <h3 class="text-2xl font-bold text-center mb-4 text-gray-800">More Apps</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <a href="https://shorturl.at/FxO7m" target="_blank" class="card-bg p-4 flex flex-col items-center text-center space-y-3"><img src="https://i.postimg.cc/RFQwLZHn/IMG-20250926-201441-985.jpg?text=APP+1" class="w-20 h-20 rounded-2xl object-cover"><h4 class="font-bold text-lg text-accent-gradient">𝐄𝐗𝐏𝐄𝐑𝐓𝐞𝐚𝐫𝐧</h4><p class="text-xs text-gray-600">একদম ফ্রীতে ইনকাম করতে পারবেন </p></a>
-                        <a href="#" class="card-bg p-4 flex flex-col items-center text-center space-y-3"><img src="https://i.postimg.cc/7hTd1GyZ/air-drop-logo-96485-1865.jpg?text=APP+2" class="w-20 h-20 rounded-2xl object-cover"><h4 class="font-bold text-lg text-accent-gradient">Airdrop</h4><p class="text-xs text-gray-600">Coming soon.</p></a>
-                    </div>
-                </div>
-                
-                <div class="text-center pt-6">
-                     <p class="text-center text-gray-600 text-sm">Developed by <a href="https://t.me/bd_Storebot/Botshop" target="_blank" class="font-semibold text-indigo-600 hover:underline">𝐁𝐃 𝐒𝐓𝐎𝐑𝐄</a></p>
-                </div>
-            </div>
-            
-            <div id="features-page" class="p-4 space-y-8 sub-page">
-                <div class="grid grid-cols-2 gap-4 text-center">
-                    <div class="card-bg p-4"><p class="text-sm text-gray-400 mb-1">TOTAL RECHARGE</p><p id="total-recharge-display" class="text-2xl font-bold text-purple-500">৳0.00</p></div>
-                    <div class="card-bg p-4"><p class="text-sm text-gray-400 mb-1">TOTAL SEND</p><p id="total-send-display" class="text-2xl font-bold text-orange-500">৳0.00</p></div>
-                    <div class="card-bg p-4"><p class="text-sm text-gray-400 mb-1">TOTAL DEPOSIT</p><p id="total-deposit-display" class="text-2xl font-bold text-sky-500">৳0.00</p></div>
-                    <div class="card-bg p-4"><p class="text-sm text-gray-400 mb-1">TOTAL RECEIVE</p><p id="total-receive-display" class="text-2xl font-bold text-yellow-500">৳0.00</p></div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <button id="features-deposit-btn" class="p-3 rounded-lg font-bold text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg btn">Deposit</button>
-                    <button id="features-recharge-btn" class="p-3 rounded-lg font-bold text-white bg-gradient-to-r from-purple-500 to-indigo-500 shadow-lg btn">Mobile Recharge</button>
-                    <button id="features-receive-btn" class="p-3 rounded-lg font-bold text-white bg-gradient-to-r from-blue-500 to-sky-500 shadow-lg btn flex items-center justify-center gap-1"><i data-lucide="arrow-down-to-line" class="w-4 h-4"></i><span>Receive</span></button>
-                    <button id="features-send-btn" class="p-3 rounded-lg font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg btn">SEND</button>
-                </div>
-
-                <div>
-                    <h3 class="text-xl font-bold mb-3">Balance Transfer History</h3>
-                    <div id="transfer-history-list" class="space-y-3"></div>
-                </div>
-            </div>
-            
-            <div id="recharge-page" class="p-4 space-y-6 sub-page">
-                <div class="relative flex items-center justify-center mb-4">
-                    <button onclick="navigateTo('features-page')" class="absolute left-0 p-2 rounded-full hover:bg-gray-100 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button>
-                    <h2 class="text-2xl font-bold text-center text-gray-800">Mobile Recharge</h2>
-                </div>
-                <div class="card-bg p-5 space-y-5">
-                    <div>
-                        <p class="text-sm text-center text-red-600 bg-red-100 p-2 rounded-lg mb-4">প্রতিটি রিচার্জে 5% ফি প্রযোজ্য।</p>
-                        <div class="space-y-4">
-                            <div><label for="recharge-number" class="block text-sm font-medium text-gray-600 mb-2">মোবাইল নম্বর</label><input id="recharge-number" type="tel" placeholder="e.g., 018********" class="w-full p-3 input-field"></div>
-                            <div>
-                                <label for="recharge-amount" class="block text-sm font-medium text-gray-600 mb-2">টাকার পরিমাণ (BDT)</label>
-                                <input id="recharge-amount" type="number" placeholder="Minimum ৳20" class="w-full p-3 input-field">
-                                <p id="recharge-fee-display" class="text-sm text-green-600 mt-1 h-5"></p>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="recharge-operator" class="block text-sm font-medium text-gray-600 mb-2">অপারেটর</label>
-                                    <select id="recharge-operator" class="w-full p-3 input-field">
-                                        <option value="">Select Operator</option><option value="Grameenphone">Grameenphone</option><option value="Robi">Robi</option><option value="Airtel">Airtel</option><option value="Banglalink">Banglalink</option><option value="Teletalk">Teletalk</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="recharge-type" class="block text-sm font-medium text-gray-600 mb-2">সিমের ধরন</label>
-                                    <select id="recharge-type" class="w-full p-3 input-field"><option value="Prepaid">Prepaid</option><option value="Postpaid">Postpaid</option></select>
-                                </div>
-                            </div>
-                            <button id="submit-recharge-btn" class="w-full p-3 btn-gradient">Submit Recharge</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-6">
-                    <h3 class="text-xl font-bold mb-3">Recharge History</h3>
-                    <div id="recharge-history-list" class="space-y-3"></div>
-                </div>
-            </div>
-            
-            <div id="send-page" class="p-4 space-y-6 sub-page">
-                <div class="relative flex items-center justify-center mb-4">
-                    <button onclick="navigateTo('features-page')" class="absolute left-0 p-2 rounded-full hover:bg-gray-100 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6 text-gray-700"></i></button>
-                    <h2 class="text-2xl font-bold text-center text-gray-800">Send Balance</h2>
-                </div>
-                <div class="card-bg p-5 space-y-5">
-                    <div>
-                        <p class="text-sm text-center text-red-600 bg-red-100 p-2 rounded-lg mb-4">প্রতিটি সেন্ডে 5% ফি প্রযোজ্য।</p>
-                        <div class="space-y-4">
-                            <div><label for="send-recipient-id" class="block text-sm font-medium text-gray-600 mb-2">প্রাপকের আইডি (Recipient ID)</label><input id="send-recipient-id" type="text" placeholder="Recipient's Telegram ID" class="w-full p-3 input-field"></div>
-                            <div>
-                                <label for="send-amount" class="block text-sm font-medium text-gray-600 mb-2">টাকার পরিমাণ (BDT)</label>
-                                <input id="send-amount" type="number" placeholder="Minimum ৳20" class="w-full p-3 input-field">
-                                <p id="send-fee-display" class="text-sm text-green-600 mt-1 h-5"></p>
-                            </div>
-                            <button id="submit-send-btn" class="w-full p-3 btn-gradient">Submit Send</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <nav class="bottom-nav flex justify-around items-center py-2">
-            <a href="#" class="nav-link-premium" data-page="updates-page"><i data-lucide="bell" class="icon"></i><span>Updates</span></a>
-            <a href="#" class="nav-link-premium" data-page="tutorial-page"><i data-lucide="film" class="icon"></i><span>Tutorial</span></a>            
-            <a href="#" class="nav-link-premium center-home-link active" data-page="home-page"><i data-lucide="home" class="icon"></i></a>
-            <a href="#" class="nav-link-premium" data-page="dollar-page"><i data-lucide="dollar-sign" class="icon"></i><span>Dollar</span></a>            
-            <a href="#" class="nav-link-premium" data-page="profile-page"><i data-lucide="user-circle-2" class="icon"></i><span>Profile</span></a>
-        </nav>
+    <div id="loader">
+        <div class="spinner"></div>
+        <p class="mt-4 text-blue-600 font-bold text-lg">MAIL STORE PRO</p>
     </div>
     
-    <a id="fab-updates-plus" href="https://t.me/SAIDULEP" target="_blank" class="fab-button fab-updates"><i data-lucide="plus" class="w-8 h-8"></i></a>
-    <a id="fab-common-telegram" href="https://t.me/earn_Supportbot" target="_blank" class="fab-button fab-telegram"><i data-lucide="send" class="w-7 h-7"></i></a>
-    <a id="fab-features-whatsapp" href="https://wa.me/8801855879942" target="_blank" class="fab-button fab-whatsapp"><svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM12.04 20.12c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31c-.82-1.31-1.26-2.83-1.26-4.38 0-4.54 3.7-8.24 8.24-8.24 4.54 0 8.24 3.7 8.24 8.24s-3.7 8.24-8.24 8.24zm4.52-6.14c-.25-.12-1.47-.72-1.7-.82s-.39-.12-.56.12c-.17.25-.64.82-.79.98-.15.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.24-.75-.66-1.25-1.48-1.4-1.73-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.17-.25.25-.41.08-.17.04-.31-.02-.43s-.56-1.34-.76-1.84c-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07s.88 2.4 1 2.56c.12.17 1.75 2.67 4.24 3.73.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18s-.25-.11-.5-.24z"/></svg></a>
+    <div id="app-container" class="min-h-screen flex-col main-page">
+        
+        <header class="header-premium">
+            <div id="header-profile-area" class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('profile-page')">
+                <img id="header-profile-pic" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover hidden" src="" alt="Profile">
+                <div id="header-initials-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-300 flex items-center justify-center border border-gray-200 shadow-sm">
+                    <span id="header-initials" class="text-sm font-bold text-gray-600"></span>
+                </div>
+            </div>
 
-    <div id="custom-alert" class="modal-container hidden">
-        <div class="modal-content space-y-4">
-            <p id="alert-message" class="text-gray-700 whitespace-pre-wrap"></p>
-            <button id="alert-ok-btn" class="btn-gradient px-8 py-2 w-full">OK</button>
-        </div>
-    </div>
-    <div id="insufficient-balance-modal" class="modal-container hidden">
-        <div class="modal-content space-y-4">
-            <i data-lucide="wallet" class="w-12 h-12 text-amber-500 mx-auto"></i>
-            <h3 class="text-xl font-bold text-gray-800">ব্যালেন্স কম!</h3>
-            <p class="text-gray-600">আপনার USDT কেনার জন্য পর্যাপ্ত ব্যালেন্স নেই। অনুগ্রহ করে প্রথমে ডিপোজিট করুন।</p>
-            <button id="insufficient-balance-deposit-btn" class="w-full p-3 btn-gradient mt-4">Deposit Now</button>
-        </div>
-    </div>
-    <div id="pin-set-modal" class="modal-container hidden">
-        <div class="modal-content space-y-4">
-            <h3 class="text-xl font-bold text-accent-gradient">নিরাপত্তার জন্য পিন সেট করুন</h3>
-            <p class="text-sm text-gray-600">একটি ৪-ডিজিটের পিন সেট করুন যা আপনি মনে রাখতে পারবেন।</p>
-            <div><label for="set-pin" class="block text-sm font-medium text-gray-600 mb-2">SET PIN</label><input id="set-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full p-3 input-field text-center text-2xl tracking-[.5em]"></div>
-            <div><label for="confirm-pin" class="block text-sm font-medium text-gray-600 mb-2">Confirm PIN</label><input id="confirm-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full p-3 input-field text-center text-2xl tracking-[.5em]"></div>
-            <div class="flex gap-4">
-                <button id="cancel-pin-set-btn" class="w-full p-3 rounded-lg bg-gray-200 text-gray-800 font-bold">Cancel</button>
-                <button id="set-pin-btn" class="w-full p-3 btn-gradient">Set PIN</button>
+            <div id="header-balance-area" class="balance-pill cursor-pointer" title="Withdraw Balance">
+                <i data-lucide="wallet" class="w-4 h-4 text-white"></i>
+                <span id="header-coin-balance">0.00</span>
             </div>
-        </div>
-    </div>
-    <div id="pin-enter-modal" class="modal-container hidden">
-        <div class="modal-content space-y-4">
-            <h3 class="text-xl font-bold text-accent-gradient">আপনার পিন দিন</h3>
-            <p class="text-sm text-gray-600">⚡ More Features OPEN FAST</p>
-            <div><input id="enter-pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full p-3 input-field text-center text-2xl tracking-[.5em]"></div>
-            <div class="flex gap-4">
-                 <button id="cancel-pin-enter-btn" class="w-full p-3 rounded-lg bg-gray-200 text-gray-800 font-bold">Cancel</button>
-                <button id="enter-pin-btn" class="w-full p-3 btn-gradient">Enter</button>
+
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <button id="header-notif-btn" class="header-icon-btn">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                    </button>
+                    <div id="notif-dot" class="notif-badge"></div>
+                </div>
+
+                <button id="header-menu-btn" class="header-icon-btn" title="Menu">
+                    <i data-lucide="grid" class="w-5 h-5"></i>
+                </button>
             </div>
-        </div>
-    </div>
-    <div id="deposit-details-modal" class="modal-container hidden">
-        <div class="modal-content space-y-4">
-            <h3 class="text-xl font-bold text-center text-accent-gradient mb-4">How to Deposit</h3>
-            <div class="text-gray-700 space-y-3 text-left">
-                <p>السلام عليكم, আপনাকে স্বাগতম</p>
-                <ol class="list-decimal list-inside space-y-2 text-sm">
-                    <li>প্রথমে আপনি যে মাধ্যমে টাকা পাঠাতে চান সেটি নির্বাচন করুন।</li>
-                    <li>এরপর প্রদর্শিত নম্বরে আপনার কাঙ্খিত পরিমাণ টাকা পাঠান।</li>
-                    <li>টাকা পাঠানোর পর, নিচের ফর্মটি পূরণ করুন।</li>
-                    <li>আপনার পাঠানো টাকার মাধ্যম, পরিমাণ, নম্বর এবং Transaction ID (TxID) সঠিকভাবে লিখুন।</li>
-                    <li>সবশেষে "Submit Deposit" বাটনে ক্লিক করুন।</li>
-                </ol>
-                <p class="text-xs text-gray-500 mt-4">আপনার ডিপোজিট দ্রুত যাচাই করে ব্যালেন্সে যোগ করা হবে।</p>
+        </header>
+
+        <main class="flex-grow px-4 pt-4 pb-20">
+            
+            <div id="home-page" class="space-y-6 sub-page">
+                <div class="rounded-2xl overflow-hidden shadow-lg relative bg-gray-200 aspect-video">
+                    <img src="https://i.postimg.cc/zBp8rCX9/Yellow-Orange-Modern-Marketing-Courses-You-Tube-Thumbnail-20250910-185659-0000.png" class="w-full h-full object-cover" alt="Banner">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                        <h3 class="text-white font-bold text-lg">Welcome to Mail Store</h3>
+                        <p class="text-gray-200 text-xs">Best place to buy and sell digital assets.</p>
+                    </div>
+                </div>
+
+                <div class="card-bg p-5 rounded-xl bg-white">
+                    <p class="text-gray-500 text-xs mb-1 uppercase tracking-wide">Total Balance</p>
+                    <div class="flex items-center justify-between">
+                        <p id="balance-display" class="text-3xl font-extrabold text-gray-800">৳0.00</p>
+                        </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div onclick="navigateTo('earn-page')" class="card-bg p-4 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-400">
+                        <div class="p-3 bg-blue-50 rounded-full text-blue-600"><i data-lucide="shopping-bag" class="w-6 h-6"></i></div>
+                        <span class="font-bold text-gray-700">Buy Products</span>
+                    </div>
+                    <div onclick="navigateTo('refer-page')" class="card-bg p-4 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-400">
+                        <div class="p-3 bg-green-50 rounded-full text-green-600"><i data-lucide="users" class="w-6 h-6"></i></div>
+                        <span class="font-bold text-gray-700">Refer & Earn</span>
+                    </div>
+                </div>
             </div>
-            <button id="deposit-details-ok-btn" class="w-full p-3 rounded-lg btn-gradient mt-4">Got It!</button>
+            
+            <div id="earn-page" class="space-y-4 sub-page">
+                <h2 class="text-xl font-bold text-gray-800">Marketplace & Tasks</h2>
+                
+                <div class="flex p-1 bg-gray-200 rounded-xl mb-4">
+                    <button onclick="switchEarnTab('tasks')" id="tab-tasks" class="flex-1 py-2 rounded-lg text-sm font-bold text-center transition-all tab-active">Tasks (Earn)</button>
+                    <button onclick="switchEarnTab('shop')" id="tab-shop" class="flex-1 py-2 rounded-lg text-sm font-bold text-center transition-all tab-inactive">Shop (Buy)</button>
+                </div>
+
+                <div id="content-tasks" class="space-y-4">
+                     <div class="card-bg p-4 rounded-xl flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><i data-lucide="coins" class="w-5 h-5"></i></div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">NAVAL COIN</h3>
+                                <p class="text-xs text-gray-500">Sell coins for cash</p>
+                            </div>
+                        </div>
+                        <button onclick="openNavalSell()" class="bg-gray-900 text-white px-4 py-2 rounded-lg text-xs font-bold">SELL</button>
+                    </div>
+
+                    <div class="card-bg p-4 rounded-xl flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600"><i data-lucide="instagram" class="w-5 h-5"></i></div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">INSTAGRAM</h3>
+                                <p class="text-xs text-gray-500">Sell old accounts</p>
+                            </div>
+                        </div>
+                        <button onclick="openInstagramSell()" class="bg-gray-900 text-white px-4 py-2 rounded-lg text-xs font-bold">SELL</button>
+                    </div>
+                </div>
+
+                <div id="content-shop" class="hidden space-y-4">
+                     <div id="mail-list-container" class="space-y-4 min-h-[200px]"></div>
+                     
+                     <div class="mt-8 border-t pt-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-gray-700">My Purchases</h3>
+                            <button id="download-history-btn" class="text-blue-600 text-xs font-semibold flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i> Save XLSX</button>
+                        </div>
+                        <div id="mail-purchase-history" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="refer-page" class="space-y-6 sub-page">
+                <div class="text-center space-y-2 mt-4">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto text-blue-600">
+                        <i data-lucide="gift" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Invite Friends</h2>
+                    <p class="text-gray-500 text-sm">Earn money by inviting your friends to Mail Store.</p>
+                </div>
+
+                <div class="card-bg p-6 rounded-2xl text-center space-y-4">
+                    <p class="text-sm text-gray-600">You will earn</p>
+                    <h3 class="text-4xl font-extrabold text-blue-600" id="refer-reward-amount">৳10</h3>
+                    <p class="text-xs text-gray-400">for every successful referral.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-500 ml-1">YOUR REFERRAL LINK</label>
+                    <div class="flex gap-2">
+                        <input id="refer-link-input" readonly class="flex-grow p-3 bg-white border border-gray-200 rounded-xl text-xs font-mono text-gray-600" value="Loading...">
+                        <button onclick="copyToClipboard(document.getElementById('refer-link-input').value, null, 'Link Copied!')" class="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700"><i data-lucide="copy" class="w-5 h-5"></i></button>
+                    </div>
+                    <button onclick="shareReferral()" class="w-full btn-gradient p-3 rounded-xl flex justify-center items-center gap-2">
+                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                        <span>Invite Friend</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="profile-page" class="space-y-6 sub-page">
+                <div class="card-bg p-6 rounded-2xl flex flex-col items-center text-center">
+                    <div class="relative mb-4">
+                        <img id="profile-pic" class="w-20 h-20 rounded-full border-4 border-blue-50 object-cover" src="" alt="Profile">
+                        <div id="profile-initials-avatar" class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center border-4 border-blue-50 hidden"><span id="profile-initials" class="text-2xl font-bold text-gray-500"></span></div>
+                    </div>
+                    <h3 id="profile-name" class="text-xl font-bold text-gray-800">Loading...</h3>
+                    <p id="profile-id" class="text-xs text-gray-400 mt-1">ID: ...</p>
+                </div>
+                
+                <div class="space-y-2">
+                     <button onclick="navigateTo('link-team-page')" class="w-full bg-white border border-gray-200 p-4 rounded-xl flex justify-between items-center hover:bg-gray-50">
+                        <span class="flex items-center gap-3"><i data-lucide="users" class="w-5 h-5 text-blue-500"></i><span class="font-semibold text-gray-700">Team Management</span></span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                    </button>
+                    <button onclick="navigateTo('withdraw-page')" class="w-full bg-white border border-gray-200 p-4 rounded-xl flex justify-between items-center hover:bg-gray-50">
+                        <span class="flex items-center gap-3"><i data-lucide="arrow-up-circle" class="w-5 h-5 text-green-500"></i><span class="font-semibold text-gray-700">Withdraw</span></span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                    </button>
+                </div>
+                
+                <button id="admin-panel-btn" onclick="navigateTo('admin-page')" class="hidden w-full bg-gray-800 text-white p-4 rounded-xl mt-4 font-bold">ADMIN PANEL</button>
+            </div>
+
+            <div id="withdraw-page" class="p-4 sub-page"><h2 class="text-xl font-bold mb-4">Withdraw</h2><div class="card-bg p-5 rounded-xl space-y-4"><select id="withdraw-method" class="w-full p-3 border rounded-lg"><option value="bKash">bKash</option><option value="Nagad">Nagad</option></select><input id="withdraw-number" placeholder="Mobile Number" class="w-full p-3 border rounded-lg"><input id="withdraw-amount" type="number" placeholder="Amount (Min 100)" class="w-full p-3 border rounded-lg"><button id="submit-withdraw-btn" class="w-full btn-gradient p-3 rounded-lg">Withdraw Request</button></div><div id="withdraw-history-list" class="mt-6 space-y-2"></div></div>
+            
+            <div id="admin-page" class="sub-page p-4">
+                 <h2 class="text-xl font-bold mb-4">Admin</h2>
+                 <div class="space-y-4">
+                     <div class="card-bg p-4 rounded-lg"><h3 class="font-bold">Add Stock</h3><select id="mail-type-select" class="w-full border p-2 mb-2 rounded"></select><textarea id="mail-data-textarea" class="w-full border p-2 rounded" placeholder="data..."></textarea><button id="add-mails-btn" class="w-full bg-black text-white p-2 rounded">Add</button></div>
+                     <div id="earn-requests-list" class="space-y-2"></div>
+                     <div id="replace-requests-list" class="space-y-2"></div>
+                 </div>
+            </div>
+            
+            <div id="link-team-page" class="sub-page p-4"><h2 class="text-xl font-bold mb-4">Team</h2><input id="link-friend-id" placeholder="Friend ID" class="w-full p-3 border rounded-lg mb-2"><button id="search-friend-btn" class="w-full btn-gradient p-3 rounded-lg">Add Member</button><div id="linked-friends-list" class="mt-4"></div></div>
+
+        </main>
+        
+        <nav class="bottom-nav">
+            <a href="#" class="nav-link-native active" data-page="home-page">
+                <i data-lucide="home" class="icon"></i>
+                <span>HOME</span>
+            </a>
+            <a href="#" class="nav-link-native" data-page="earn-page">
+                <i data-lucide="layers" class="icon"></i>
+                <span>EARN</span>
+            </a>
+            <a href="#" class="nav-link-native" data-page="refer-page">
+                <i data-lucide="users" class="icon"></i>
+                <span>REFER</span>
+            </a>
+            <a href="#" class="nav-link-native" data-page="profile-page">
+                <i data-lucide="user" class="icon"></i>
+                <span>PROFILE</span>
+            </a>
+        </nav>
+    </div>
+
+    <div id="menu-page" class="full-screen-page hidden p-4">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Menu</h2>
+            <button onclick="document.getElementById('menu-page').classList.add('hidden')" class="p-2 bg-gray-200 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        
+        <div class="space-y-4">
+            <h3 class="text-sm font-bold text-gray-500 uppercase">Support</h3>
+            <button id="menu-telegram-btn" class="w-full bg-blue-500 text-white p-4 rounded-xl flex items-center gap-3 shadow-md">
+                <i data-lucide="send" class="w-6 h-6"></i> <span class="font-bold">Join Telegram Channel</span>
+            </button>
+            <button id="menu-whatsapp-btn" class="w-full bg-green-500 text-white p-4 rounded-xl flex items-center gap-3 shadow-md">
+                <i data-lucide="message-circle" class="w-6 h-6"></i> <span class="font-bold">WhatsApp Support</span>
+            </button>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t">
+            <p class="text-center text-xs text-gray-400">Version 2.0.0 Pro</p>
         </div>
     </div>
+    
+    <div id="custom-alert" class="hidden fixed inset-0 bg-black/50 z-[80] flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white p-6 rounded-2xl w-full max-w-xs text-center"><p id="alert-message" class="mb-4 text-gray-800 font-medium"></p><button id="alert-ok-btn" class="w-full bg-black text-white py-2 rounded-lg">OK</button></div></div>
+    
+    <div id="instagram-sell-modal" class="hidden fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm space-y-4 relative">
+             <button onclick="document.getElementById('instagram-sell-modal').classList.add('hidden')" class="absolute top-3 right-3"><i data-lucide="x" class="w-5 h-5"></i></button>
+             <h3 class="font-bold text-lg">Sell Instagram</h3>
+             <p id="insta-rate-display" class="text-green-600 font-bold text-sm text-center">Rate: Loading...</p>
+             <input id="insta-username" placeholder="Username" class="w-full p-3 border rounded-lg">
+             <input id="insta-password" placeholder="Password" class="w-full p-3 border rounded-lg">
+             <input id="insta-email" placeholder="Email" class="w-full p-3 border rounded-lg">
+             <button onclick="handleInstagramSubmit()" class="w-full btn-gradient p-3 rounded-lg">Submit</button>
+        </div>
+    </div>
+    
+    <div id="naval-sell-modal" class="hidden fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm space-y-4 relative">
+             <button onclick="document.getElementById('naval-sell-modal').classList.add('hidden')" class="absolute top-3 right-3"><i data-lucide="x" class="w-5 h-5"></i></button>
+             <h3 class="font-bold text-lg">Sell Naval Coin</h3>
+             <div class="bg-yellow-50 p-3 rounded text-center mb-2"><span id="naval-target-id" class="font-mono font-bold">...</span></div>
+             <input id="naval-sender-id" placeholder="Your Send ID" class="w-full p-3 border rounded-lg">
+             <input id="naval-amount" type="number" placeholder="Amount" class="w-full p-3 border rounded-lg">
+             <button onclick="handleNavalSubmit()" class="w-full btn-gradient p-3 rounded-lg">Submit</button>
+        </div>
+    </div>
+    
+    <div id="purchase-success-modal" class="hidden fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center space-y-4">
+             <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mx-auto"></i>
+             <h3 class="font-bold text-xl">Purchase Successful!</h3>
+             <div class="bg-gray-100 p-3 rounded-lg text-left text-xs font-mono break-all">
+                 <p class="mb-1 text-gray-500">EMAIL:</p>
+                 <p id="purchase-success-email" class="font-bold select-all mb-2">...</p>
+                 <p class="mb-1 text-gray-500">PASS:</p>
+                 <p id="purchase-success-password" class="font-bold select-all">...</p>
+             </div>
+             <button onclick="document.getElementById('purchase-success-modal').classList.add('hidden')" class="w-full bg-black text-white p-3 rounded-lg">Close</button>
+        </div>
+    </div>
+
 
     <script type="module">
-        const firebaseConfig = {
-          apiKey: "AIzaSyCoCy08FL_sHHdA0f2cJg0BaF-iYAhFuk0",
-          authDomain: "mail-store-4692b.firebaseapp.com",
-          databaseURL: "https://mail-store-4692b-default-rtdb.firebaseio.com",
-          projectId: "mail-store-4692b",
-          storageBucket: "mail-store-4692b.firebasestorage.app",
-          messagingSenderId: "264936867411",
-          appId: "1:264936867411:web:5933919e5bafae617968a6"
-        };
-        
+        const ADMIN_UID = "6954647230"; // Set Admin ID
+        const BOT_USERNAME = "YourBotName_bot"; // Change this to your bot username (without @)
+
+        // Firebase Setup
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit, runTransaction, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit, runTransaction, getCountFromServer, writeBatch, updateDoc, increment, arrayUnion, arrayRemove, Timestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD856qtFfeP-_NJKCzwhfzFMo7ghUuXdLU",
+            authDomain: "instagramfarmer-58008.firebaseapp.com",
+            databaseURL: "https://instagramfarmer-58008-default-rtdb.firebaseio.com",
+            projectId: "instagramfarmer-58008",
+            storageBucket: "instagramfarmer-58008.firebasestorage.app",
+            messagingSenderId: "1030789650144",
+            appId: "1:1030789650144:web:5add8042fdd69397c92285"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         let currentUserTg = null;
         let userData = null;
-        let appConfig = {};
-        
-        // --- Dollar Rates (These should ideally be fetched from Firebase config) ---
-        const DOLLAR_BUY_RATE = 125.00; // The price user pays to buy 1 USDT
-        const DOLLAR_SELL_RATE = 120.00; // The price admin pays to user for 1 USDT
+        let appConfig = { referReward: 10 }; // Default reward
 
-        const loader = document.getElementById('loader');
-        const getLoadingHTML = () => `<div class="flex justify-center items-center p-10"><div class="w-14 h-14 border-4 border-t-indigo-500 border-gray-200 rounded-full animate-spin"></div></div>`;
-
+        // Init
         window.onload = async () => {
             try {
                 window.Telegram.WebApp.ready();
                 window.Telegram.WebApp.expand();
+                window.Telegram.WebApp.setHeaderColor('#ffffff'); // Native Header Color
                 currentUserTg = window.Telegram.WebApp.initDataUnsafe.user;
+                
                 if (!currentUserTg) {
-                    showAlert("Telegram user data not found. Please open this app from Telegram.");
-                    loader.style.display = 'none';
+                    // For debugging in browser without TG
+                    // currentUserTg = { id: 123456, first_name: "Test", last_name: "User", username: "tester" }; 
+                    document.getElementById('loader').innerHTML = "<p>Please open in Telegram</p>";
                     return;
                 }
-            } catch (e) { 
-                showAlert("Error initializing Telegram Mini App. Please try again from Telegram.");
-                loader.style.display = 'none';
-                return;
-            }
+            } catch (e) { console.error(e); }
+
             lucide.createIcons();
             setupEventListeners();
-            setupBanner(); 
-            
             await initUserSession();
             
-            loader.style.opacity = '0';
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 500);
+            document.getElementById('loader').style.display = 'none';
         };
 
         async function initUserSession() {
-            if (!currentUserTg) {
-                showAlert("Telegram user data is missing. Cannot proceed.");
-                return;
-            }
             const tgChatId = String(currentUserTg.id);
             const userRef = doc(db, "users", tgChatId);
-            const userSnap = await getDoc(userRef);
+            let userSnap = await getDoc(userRef);
 
-            if (userSnap.exists()) {
-                userData = userSnap.data();
-            } else {
-                const userName = `${currentUserTg.first_name || ''} ${currentUserTg.last_name || ''}`.trim() || `User ${tgChatId}`;
-                userData = { 
+            // Fetch Config First
+            const configSnap = await getDoc(doc(db, "config", "main"));
+            if (configSnap.exists()) appConfig = { ...appConfig, ...configSnap.data() };
+
+            // REFERRAL CHECK LOGIC
+            if (!userSnap.exists()) {
+                const startParam = window.Telegram.WebApp.initDataUnsafe.start_param;
+                let referredBy = null;
+
+                if (startParam && startParam !== tgChatId) {
+                    // Check if referrer exists
+                    const referrerSnap = await getDoc(doc(db, "users", startParam));
+                    if (referrerSnap.exists()) {
+                        referredBy = startParam;
+                        // Give Reward to Referrer
+                        const reward = appConfig.referReward || 10;
+                        await updateDoc(doc(db, "users", startParam), {
+                            balance: increment(reward)
+                        });
+                        // Optional: Log Notification for Referrer
+                        await addDoc(collection(db, "notifications"), {
+                            recipientId: startParam,
+                            title: "🎉 New Referral!",
+                            message: `User ${currentUserTg.first_name} joined via your link. You earned ৳${reward}.`,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+                }
+
+                userData = {
                     tgChatId: tgChatId,
-                    name: userName,
+                    name: `${currentUserTg.first_name || ''} ${currentUserTg.last_name || ''}`.trim(),
                     username: currentUserTg.username || null,
-                    balance: 0, 
-                    createdAt: serverTimestamp(), 
-                    isBlocked: false,
-                    pin: null,
-                    pinFailAttempts: [],
-                    featuresLockedUntil: null
+                    balance: 0,
+                    referredBy: referredBy, // Store who referred them
+                    createdAt: serverTimestamp(),
+                    isBlocked: false
                 };
                 await setDoc(userRef, userData);
+            } else {
+                userData = userSnap.data();
+                if(userData.isBlocked) return alert("You are blocked.");
+                // Update basic info
+                await updateDoc(userRef, { 
+                    name: `${currentUserTg.first_name || ''} ${currentUserTg.last_name || ''}`.trim(),
+                    lastSeen: serverTimestamp()
+                });
             }
 
-            if (userData.isBlocked) {
-                showAlert("আপনার অ্যাকাউন্ট ব্লক করা হয়েছে।");
-                return;
-            }
+            if (tgChatId === ADMIN_UID) document.getElementById('admin-panel-btn').classList.remove('hidden');
 
-            // You can fetch appConfig if you store rates in Firebase
-            // await fetchAppConfig();
-            
             updateUI();
-            showMainPage('app-container');
             navigateTo('home-page');
-            document.getElementById('header-user-greeting').innerText = `Welcome, ${currentUserTg.first_name}!`;
-        }
-        
-        function updateUI() {
-            if (!userData) return;
-            const balance = (userData.balance || 0).toFixed(2);
-            document.getElementById('balance-display').textContent = `৳${balance}`;
-            document.getElementById('header-balance-display').textContent = `৳${balance}`;
         }
 
-        function showMainPage(pageId) {
-            document.querySelectorAll('.main-page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+        function updateUI() {
+            document.getElementById('balance-display').textContent = `৳${(userData.balance || 0).toFixed(2)}`;
+            document.getElementById('header-coin-balance').textContent = `৳${(userData.balance || 0).toFixed(2)}`;
+            
+            // Profile Header
+            const initials = (userData.name?.[0] || 'U').toUpperCase();
+            document.getElementById('header-initials').textContent = initials;
         }
-        
-        function navigateTo(pageId) {
+
+        // NAVIGATION LOGIC
+        window.navigateTo = function(pageId) {
             document.querySelectorAll('.sub-page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
-            document.querySelectorAll('.nav-link-premium[data-page]').forEach(link => {
-                link.classList.toggle('active', link.dataset.page === pageId);
-            });
-
-            document.getElementById('fab-updates-plus').classList.toggle('visible', pageId === 'updates-page');
-            document.getElementById('fab-common-telegram').classList.toggle('visible', pageId === 'home-page' || pageId === 'dollar-page');
-            document.getElementById('fab-features-whatsapp').classList.toggle('visible', pageId === 'features-page');
             
-            const pageLoadFunctions = {
-                'pay-page': loadPaymentHistory,
-                'dollar-page': loadDollarBuySellPage,
-                'updates-page': loadUpdates,
-                'profile-page': loadProfilePage,
-                'features-page': loadFeaturesPage,
-                'tutorial-page': loadTutorials,
-                'home-page': loadReviews,
-                'recharge-page': () => { 
-                    loadRechargeHistory(); 
-                    setupDynamicAmountHandlers('recharge');
-                },
-                'send-page': () => {
-                    setupDynamicAmountHandlers('send');
-                }
-            };
-            if (pageLoadFunctions[pageId]) pageLoadFunctions[pageId]();
+            // Update Bottom Nav Active State
+            document.querySelectorAll('.nav-link-native').forEach(l => l.classList.remove('active'));
+            const activeLink = document.querySelector(`.nav-link-native[data-page="${pageId}"]`);
+            if(activeLink) activeLink.classList.add('active');
+
+            // Page Specific Loads
+            if(pageId === 'earn-page') loadMailStore(); // Load shop content
+            if(pageId === 'refer-page') loadReferPage();
+            if(pageId === 'profile-page') loadProfilePage();
+            if(pageId === 'withdraw-page') loadWithdrawHistory();
+            if(pageId === 'admin-page') { populateAdminMailTypes(); loadEarnRequests(); loadReplaceRequests(); }
+            
             lucide.createIcons();
         }
-        window.navigateTo = navigateTo;
 
-        function setupEventListeners() {
-            document.querySelectorAll('.nav-link-premium[data-page]').forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); navigateTo(link.dataset.page); }));
-            document.getElementById('header-deposit-btn').addEventListener('click', () => navigateTo('pay-page'));
-            document.getElementById('deposit-btn').addEventListener('click', handleDepositRequest);
-            document.getElementById('home-deposit-btn').addEventListener('click', () => navigateTo('pay-page'));
-            document.getElementById('deposit-details-ok-btn').addEventListener('click', () => document.getElementById('deposit-details-modal').classList.add('hidden'));
+        // --- NEW FEATURES IMPLEMENTATION ---
 
-            document.getElementById('more-features-btn').addEventListener('click', handleFeaturesClick);
-            document.getElementById('features-deposit-btn').addEventListener('click', () => navigateTo('pay-page'));
-            document.getElementById('features-recharge-btn').addEventListener('click', () => navigateTo('recharge-page'));
-            document.getElementById('features-receive-btn').addEventListener('click', handleReceive);
-            document.getElementById('features-send-btn').addEventListener('click', () => navigateTo('send-page'));
-            document.getElementById('submit-recharge-btn').addEventListener('click', handleRechargeRequest);
-            document.getElementById('submit-send-btn').addEventListener('click', handleSendRequest);
+        // 1. EARN PAGE TABS
+        window.switchEarnTab = function(tabName) {
+            document.getElementById('content-tasks').classList.add('hidden');
+            document.getElementById('content-shop').classList.add('hidden');
             
-            document.getElementById('set-pin-btn').addEventListener('click', handleSetPin);
-            document.getElementById('enter-pin-btn').addEventListener('click', handleEnterPin);
-            document.getElementById('cancel-pin-set-btn').addEventListener('click', () => document.getElementById('pin-set-modal').classList.add('hidden'));
-            document.getElementById('cancel-pin-enter-btn').addEventListener('click', () => document.getElementById('pin-enter-modal').classList.add('hidden'));
+            document.getElementById('tab-tasks').className = "flex-1 py-2 rounded-lg text-sm font-bold text-center transition-all tab-inactive";
+            document.getElementById('tab-shop').className = "flex-1 py-2 rounded-lg text-sm font-bold text-center transition-all tab-inactive";
             
-            document.getElementById('insufficient-balance-deposit-btn').addEventListener('click', () => {
-                document.getElementById('insufficient-balance-modal').classList.add('hidden');
-                navigateTo('pay-page');
-            });
-            document.getElementById('alert-ok-btn').addEventListener('click', () => document.getElementById('custom-alert').classList.add('hidden'));
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).className = "flex-1 py-2 rounded-lg text-sm font-bold text-center transition-all tab-active";
         }
-        
-        function loadProfilePage() {
-            const profilePic = document.getElementById('profile-pic');
-            const avatarDiv = document.getElementById('profile-initials-avatar');
+
+        // 2. REFER PAGE LOGIC
+        function loadReferPage() {
+            const reward = appConfig.referReward || 10;
+            document.getElementById('refer-reward-amount').textContent = `৳${reward}`;
             
-            if (currentUserTg) {
-                if (currentUserTg.photo_url) {
-                    profilePic.src = currentUserTg.photo_url;
-                    profilePic.classList.remove('hidden');
-                    avatarDiv.classList.add('hidden');
-                } else {
-                    const initials = (currentUserTg.first_name?.[0] || '') + (currentUserTg.last_name?.[0] || '');
-                    document.getElementById('profile-initials').textContent = initials.toUpperCase();
-                    profilePic.classList.add('hidden');
-                    avatarDiv.classList.remove('hidden');
+            // Generate Bot Link with Start Param
+            // Format: https://t.me/BotUsername?start=UserId
+            const link = `https://t.me/${BOT_USERNAME}?start=${userData.tgChatId}`;
+            document.getElementById('refer-link-input').value = link;
+        }
+
+        window.shareReferral = function() {
+            const link = document.getElementById('refer-link-input').value;
+            const text = `Join Mail Store and earn money! Use my link: ${link}`;
+            const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
+            window.Telegram.WebApp.openTelegramLink(url);
+        }
+
+        // 3. DYNAMIC MENU SUPPORT LINKS
+        document.getElementById('header-menu-btn').addEventListener('click', () => {
+            const tgLink = appConfig.support?.telegram || "https://t.me/YourChannel";
+            const waLink = appConfig.support?.whatsapp || "https://wa.me/YourNumber";
+            
+            document.getElementById('menu-telegram-btn').onclick = () => window.Telegram.WebApp.openTelegramLink(tgLink);
+            document.getElementById('menu-whatsapp-btn').onclick = () => window.Telegram.WebApp.openLink(waLink);
+            
+            document.getElementById('menu-page').classList.remove('hidden');
+        });
+
+        // 4. MAIL STORE LOGIC (MOVED TO EARN PAGE)
+        async function loadMailStore() {
+            const container = document.getElementById('mail-list-container');
+            container.innerHTML = '<div class="text-center p-4"><div class="spinner mx-auto"></div></div>';
+            
+            try {
+                // Get Mails from Config
+                const mails = appConfig.mails || [];
+                // Get Stock Counts
+                // Optimization: In real app, store stock counts in a separate 'stats' doc to avoid reading all collection
+                // For now, using existing logic but safe check
+                if(mails.length === 0) {
+                     container.innerHTML = '<p class="text-gray-500 text-center">No products available.</p>';
+                     return;
                 }
-                document.getElementById('profile-name').textContent = `${currentUserTg.first_name} ${currentUserTg.last_name || ''}`.trim();
-                document.getElementById('profile-username').textContent = currentUserTg.username ? `@${currentUserTg.username}` : 'No Telegram Username';
-                document.getElementById('profile-id').textContent = `ID: ${currentUserTg.id}`;
-            }
-        }
 
-        async function handleDepositRequest() {
-            const method = document.getElementById('deposit-method').value;
-            const amount = parseInt(document.getElementById('deposit-amount').value);
-            const senderNumber = document.getElementById('sender-number').value.trim();
-            const transactionId = document.getElementById('deposit-txid').value.trim();
-            if (!method || !amount || amount <= 0 || !senderNumber || !transactionId) return showAlert("অনুগ্রহ করে সমস্ত তথ্য সঠিকভাবে পূরণ করুন।");
-            
-            loader.style.opacity = '1';
-            loader.style.display = 'flex';
-            
-            try {
-                await addDoc(collection(db, "deposits"), {
-                    userId: userData.tgChatId,
-                    userName: userData.name,
-                    method: method,
-                    amount: amount,
-                    senderNumber: senderNumber,
-                    transactionId: transactionId,
-                    status: "pending",
-                    requestedAt: serverTimestamp()
-                });
-                showAlert("আপনার ডিপোজিট অনুরোধ সফলভাবে জমা হয়েছে।");
-                document.getElementById('deposit-method').value = '';
-                document.getElementById('deposit-amount').value = '';
-                document.getElementById('sender-number').value = '';
-                document.getElementById('deposit-txid').value = '';
-                loadPaymentHistory();
-            } catch (error) {
-                showAlert("ডিপোজিট অনুরোধ জমা দিতে একটি সমস্যা হয়েছে।");
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-
-        async function loadPaymentHistory() {
-            const historyList = document.getElementById('payment-history-list');
-            historyList.innerHTML = getLoadingHTML();
-            try {
-                const q = query(collection(db, "deposits"), where("userId", "==", userData.tgChatId), orderBy("requestedAt", "desc"), limit(10));
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) return historyList.innerHTML = '<p class="text-gray-600 text-center">কোনো রেকর্ড পাওয়া যায়নি।</p>';
-
-                historyList.innerHTML = snapshot.docs.map(doc => {
-                    const item = doc.data();
-                    let statusColor, statusIcon;
-                    switch (item.status) {
-                        case 'approved': statusColor = 'text-green-600'; statusIcon = 'check-circle-2'; break;
-                        case 'rejected': statusColor = 'text-red-600'; statusIcon = 'x-circle'; break;
-                        default: statusColor = 'text-yellow-600'; statusIcon = 'hourglass';
-                    }
-                    const date = item.requestedAt ? item.requestedAt.toDate().toLocaleDateString('en-GB') : 'N/A';
-                    return `<div class="card-bg p-3 rounded-lg flex items-center justify-between"><div class="flex items-center gap-3"><i data-lucide="${statusIcon}" class="w-6 h-6 ${statusColor}"></i><div><p class="font-semibold text-gray-800">${item.type || 'Deposit'} - ${item.method}</p><p class="text-xs text-gray-500">${date}</p></div></div><div class="text-right"><p class="font-bold text-lg text-gray-800">৳${item.amount}</p><p class="font-semibold ${statusColor} capitalize text-xs">${item.status}</p></div></div>`;
-                }).join('');
-                lucide.createIcons();
-            } catch (error) {
-                historyList.innerHTML = '<p class="text-red-600 text-center">হিস্ট্রি লোড করা যায়নি।</p>';
-            }
-        }
-        
-        // --- DOLLAR BUY/SELL PAGE FUNCTIONS ---
-        
-        function loadDollarBuySellPage() {
-            document.getElementById('buy-rate-display').textContent = `৳${DOLLAR_BUY_RATE.toFixed(2)}`;
-            document.getElementById('sell-rate-display').textContent = `৳${DOLLAR_SELL_RATE.toFixed(2)}`;
-            setupDollarPageEventListeners();
-            loadTransactionHistory();
-        }
-        
-        function setupDollarPageEventListeners() {
-            const buyTab = document.getElementById('dollar-buy-tab');
-            const sellTab = document.getElementById('dollar-sell-tab');
-            const buyForm = document.getElementById('buy-dollar-form');
-            const sellForm = document.getElementById('sell-dollar-form');
-
-            buyTab.addEventListener('click', () => {
-                buyTab.classList.add('active');
-                sellTab.classList.remove('active');
-                buyForm.classList.remove('hidden');
-                sellForm.classList.add('hidden');
-            });
-
-            sellTab.addEventListener('click', () => {
-                sellTab.classList.add('active');
-                buyTab.classList.remove('active');
-                sellForm.classList.remove('hidden');
-                buyForm.classList.add('hidden');
-            });
-            
-            const buyAmountInput = document.getElementById('buy-amount-usd');
-            const buyTotalDisplay = document.getElementById('buy-total-bdt');
-            buyAmountInput.addEventListener('input', () => {
-                const amount = parseFloat(buyAmountInput.value) || 0;
-                buyTotalDisplay.textContent = `৳${(amount * DOLLAR_BUY_RATE).toFixed(2)}`;
-            });
-            
-            const sellAmountInput = document.getElementById('sell-amount-usd');
-            const sellTotalDisplay = document.getElementById('sell-total-bdt');
-            sellAmountInput.addEventListener('input', () => {
-                const amount = parseFloat(sellAmountInput.value) || 0;
-                sellTotalDisplay.textContent = `৳${(amount * DOLLAR_SELL_RATE).toFixed(2)}`;
-            });
-            
-            document.getElementById('submit-buy-request-btn').addEventListener('click', handleBuyRequest);
-            document.getElementById('submit-sell-request-btn').addEventListener('click', handleSellRequest);
-        }
-
-        async function handleBuyRequest() {
-            const amountUsd = parseFloat(document.getElementById('buy-amount-usd').value);
-            const binanceId = document.getElementById('buy-binance-id').value.trim();
-            
-            if (isNaN(amountUsd) || amountUsd <= 0 || !binanceId) {
-                return showAlert("Please enter a valid amount and your Binance Pay ID.");
-            }
-            
-            const totalCostBdt = amountUsd * DOLLAR_BUY_RATE;
-            
-            if (userData.balance < totalCostBdt) {
-                document.getElementById('insufficient-balance-modal').classList.remove('hidden');
-                lucide.createIcons();
-                return;
-            }
-            
-            if (!confirm(`You are about to request to buy ${amountUsd} USDT for ৳${totalCostBdt.toFixed(2)}. This amount will be deducted from your balance. Continue?`)) {
-                return;
-            }
-            
-            loader.style.display = 'flex';
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const userRef = doc(db, "users", userData.tgChatId);
-                    const userDoc = await transaction.get(userRef);
+                // Render List
+                container.innerHTML = '';
+                for (const mail of mails) {
+                    // Check stock count
+                    const q = query(collection(db, mail.stockKey), where("isSold", "==", false));
+                    const snap = await getCountFromServer(q);
+                    const stock = snap.data().count;
                     
-                    if (!userDoc.exists() || userDoc.data().balance < totalCostBdt) {
-                        throw "Insufficient balance. Please deposit more funds.";
-                    }
+                    const isOutOfStock = stock === 0;
                     
-                    transaction.update(userRef, { balance: userDoc.data().balance - totalCostBdt });
+                    const html = `
+                    <div class="card-bg p-4 rounded-xl flex justify-between items-center">
+                        <div>
+                             <h4 class="font-bold text-gray-800">${mail.type}</h4>
+                             <p class="text-xs text-gray-500">Price: <span class="text-blue-600 font-bold">৳${mail.priceBdt}</span> | Stock: <span class="${stock > 0 ? 'text-green-600' : 'text-red-500'} font-bold">${stock}</span></p>
+                        </div>
+                        <button onclick="buyMail('${mail.type}', ${mail.priceBdt}, '${mail.stockKey}')" class="px-4 py-2 rounded-lg text-xs font-bold ${isOutOfStock ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}" ${isOutOfStock ? 'disabled' : ''}>
+                            ${isOutOfStock ? 'Sold Out' : 'BUY'}
+                        </button>
+                    </div>`;
+                    container.insertAdjacentHTML('beforeend', html);
+                }
+                loadPurchaseHistory();
+            } catch(e) { console.error(e); container.innerHTML = '<p class="text-red-500">Error loading shop.</p>'; }
+        }
+
+        async function loadPurchaseHistory() {
+             const list = document.getElementById('mail-purchase-history');
+             // Load recent 5 purchases
+             const q = query(collection(db, "mail_purchases"), where("userId", "==", userData.tgChatId), orderBy("purchasedAt", "desc"), limit(5));
+             const snap = await getDocs(q);
+             
+             if(snap.empty) { list.innerHTML = '<p class="text-xs text-gray-400 text-center">No history.</p>'; return; }
+             
+             list.innerHTML = snap.docs.map(doc => {
+                 const d = doc.data();
+                 return `<div class="bg-white p-3 rounded border flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-xs">${d.mailType}</p>
+                        <p class="text-[10px] text-gray-500 font-mono">${d.mail}</p>
+                    </div>
+                    <button onclick="copyToClipboard('${d.mail}|${d.password}', this)" class="text-blue-500"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                 </div>`;
+             }).join('');
+             lucide.createIcons();
+        }
+
+        window.buyMail = async (type, cost, stockKey) => {
+            if(userData.balance < cost) return alert("Insufficient Balance!");
+            if(!confirm(`Buy ${type} for ৳${cost}?`)) return;
+            
+            document.getElementById('loader').style.display = 'flex';
+            try {
+                await runTransaction(db, async (t) => {
+                    // 1. Get unsold mail
+                    const q = query(collection(db, stockKey), where("isSold", "==", false), limit(1));
+                    const mailSnap = await getDocs(q);
+                    if(mailSnap.empty) throw "Stock finished!";
                     
-                    const transactionRef = doc(collection(db, "dollar_transactions"));
-                    transaction.set(transactionRef, {
+                    const mailDoc = mailSnap.docs[0];
+                    const userDocRef = doc(db, "users", userData.tgChatId);
+                    
+                    // 2. Check balance again inside transaction
+                    const uSnap = await t.get(userDocRef);
+                    if(uSnap.data().balance < cost) throw "Insufficient Balance";
+                    
+                    // 3. Execute
+                    t.update(userDocRef, { balance: increment(-cost) });
+                    t.update(mailDoc.ref, { isSold: true, soldTo: userData.tgChatId, soldAt: serverTimestamp() });
+                    
+                    const purchaseRef = doc(collection(db, "mail_purchases"));
+                    t.set(purchaseRef, {
                         userId: userData.tgChatId,
-                        userName: userData.name,
-                        type: 'buy',
-                        amountUsd: amountUsd,
-                        rate: DOLLAR_BUY_RATE,
-                        amountBdt: totalCostBdt,
-                        binanceId: binanceId,
-                        status: 'pending',
-                        requestedAt: serverTimestamp()
+                        mailType: type,
+                        cost: cost,
+                        mail: mailDoc.data().email || mailDoc.data().uid,
+                        password: mailDoc.data().password,
+                        purchasedAt: serverTimestamp()
                     });
-                });
-                
-                userData.balance -= totalCostBdt;
-                updateUI();
-                showAlert("Your request to buy USDT has been submitted successfully. Admin will process it shortly.");
-                document.getElementById('buy-amount-usd').value = '';
-                document.getElementById('buy-binance-id').value = '';
-                loadTransactionHistory();
-            } catch (error) {
-                showAlert(typeof error === 'string' ? error : "An error occurred. Please try again.");
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-        
-        async function handleSellRequest() {
-            const amountUsd = parseFloat(document.getElementById('sell-amount-usd').value);
-            const method = document.getElementById('sell-payment-method').value;
-            const number = document.getElementById('sell-payment-number').value.trim();
-            const txId = document.getElementById('sell-txid').value.trim();
-
-            if (isNaN(amountUsd) || amountUsd <= 0 || !method || !number) {
-                return showAlert("Please fill all required fields correctly.");
-            }
-            
-            const totalBdt = amountUsd * DOLLAR_SELL_RATE;
-            
-            loader.style.display = 'flex';
-            try {
-                await addDoc(collection(db, "dollar_transactions"), {
-                    userId: userData.tgChatId,
-                    userName: userData.name,
-                    type: 'sell',
-                    amountUsd: amountUsd,
-                    rate: DOLLAR_SELL_RATE,
-                    amountBdt: totalBdt,
-                    paymentMethod: method,
-                    paymentNumber: number,
-                    binanceTxId: txId,
-                    status: 'pending',
-                    requestedAt: serverTimestamp()
-                });
-                
-                showAlert("Your request to sell USDT has been submitted. Admin will verify and add the balance to your account.");
-                document.getElementById('sell-amount-usd').value = '';
-                document.getElementById('sell-payment-number').value = '';
-                document.getElementById('sell-txid').value = '';
-                loadTransactionHistory();
-            } catch (error) {
-                showAlert("Failed to submit your request. Please try again.");
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-
-        async function loadTransactionHistory() {
-            const historyList = document.getElementById('dollar-history-list');
-            historyList.innerHTML = getLoadingHTML();
-            try {
-                const q = query(collection(db, "dollar_transactions"), where("userId", "==", userData.tgChatId), orderBy("requestedAt", "desc"), limit(10));
-                const snapshot = await getDocs(q);
-                
-                if (snapshot.empty) {
-                    return historyList.innerHTML = '<p class="text-gray-600 text-center">No transaction history found.</p>';
-                }
-                
-                historyList.innerHTML = snapshot.docs.map(doc => {
-                    const item = doc.data();
-                    let statusColor, statusIcon;
-                    switch (item.status) {
-                        case 'approved': statusColor = 'text-green-600'; statusIcon = 'check-circle-2'; break;
-                        case 'rejected': statusColor = 'text-red-600'; statusIcon = 'x-circle'; break;
-                        default: statusColor = 'text-yellow-600'; statusIcon = 'hourglass';
-                    }
-                    const isBuy = item.type === 'buy';
-                    const title = isBuy ? `Buy ${item.amountUsd} USDT` : `Sell ${item.amountUsd} USDT`;
-                    const date = item.requestedAt ? item.requestedAt.toDate().toLocaleDateString('en-GB') : 'N/A';
                     
-                    return `<div class="card-bg p-3 rounded-lg flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i data-lucide="${statusIcon}" class="w-6 h-6 ${statusColor}"></i>
-                                    <div>
-                                        <p class="font-semibold text-gray-800">${title}</p>
-                                        <p class="text-xs text-gray-500">${date}</p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <p class="font-bold text-lg ${isBuy ? 'text-red-600' : 'text-green-600'}">${isBuy ? '-' : '+'}৳${item.amountBdt.toFixed(2)}</p>
-                                    <p class="font-semibold ${statusColor} capitalize text-xs">${item.status}</p>
-                                </div>
-                            </div>`;
-                }).join('');
-                lucide.createIcons();
-            } catch (error) {
-                console.error("Error loading transaction history: ", error);
-                historyList.innerHTML = '<p class="text-red-600 text-center">Could not load history.</p>';
-            }
-        }
-        
-        async function loadUpdates() {
-            const updatesContainer = document.getElementById('updates-content');
-            updatesContainer.innerHTML = getLoadingHTML();
-            try {
-                const q = query(collection(db, "updates"), orderBy("createdAt", "desc"), limit(1));
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) return updatesContainer.innerHTML = `<div class="card-bg p-6 text-center"><h3 class="font-bold text-xl text-gray-800">No new updates right now!</h3><p class="text-gray-600 mt-2">Check back later.</p></div>`;
-                
-                const updateData = snapshot.docs[0].data();
-                const createdAtDate = updateData.createdAt ? updateData.createdAt.toDate().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-                
-                updatesContainer.innerHTML = `<div class="card-bg overflow-hidden flex flex-col">${updateData.imageUrl ? `<img src="${updateData.imageUrl}" class="w-full aspect-[16/9] object-cover" alt="Update Banner">` : ''}<div class="p-6 space-y-4 flex flex-col flex-grow"><div><h3 class="text-2xl font-bold text-gray-800">${updateData.title}</h3>${createdAtDate ? `<p class="text-xs text-gray-500 mt-1">${createdAtDate}</p>` : ''}</div><p class="text-gray-600 text-base whitespace-pre-wrap flex-grow leading-relaxed">${updateData.content || ''}</p>${updateData.linkUrl ? `<a href="${updateData.linkUrl}" target="_blank" class="btn-gradient px-4 py-2 rounded-lg text-sm mt-4 text-center">Learn More</a>` : ''}</div></div>`;
-                lucide.createIcons();
-            } catch(e) { 
-                updatesContainer.innerHTML = `<p class="text-center text-red-600">Failed to load updates.</p>`; 
-            }
-        }
-
-        function showAlert(message) {
-            document.getElementById('alert-message').innerText = message;
-            document.getElementById('custom-alert').classList.remove('hidden');
-        }
-        
-        window.copyToClipboard = function(text, element) {
-            if (!text || typeof text !== 'string') return;
-            navigator.clipboard.writeText(text.trim()).then(() => {
-                if (element) {
-                    const originalContent = element.innerHTML;
-                    element.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-green-600"></i>`;
-                    lucide.createIcons();
-                    setTimeout(() => { element.innerHTML = originalContent; lucide.createIcons(); }, 1500);
-                } else {
-                    showAlert('কপি করা হয়েছে!');
-                }
-            }).catch(err => {
-                showAlert('দুঃখিত, কপি করা যায়নি।');
-            });
-        }
-        
-        function setupBanner() {
-            const slides = document.querySelectorAll('#slides .min-w-full');
-            const slideContainer = document.getElementById('slides');
-            const dotsContainer = document.getElementById('dots');
-            if (slides.length <= 1) return;
-            let index = 0;
-            dotsContainer.innerHTML = Array.from(slides).map((_, i) => `<span class="inline-block h-2 w-2 m-1 rounded-full cursor-pointer transition-all ${i === 0 ? 'active w-4 bg-white' : 'bg-white/50'}" data-index="${i}"></span>`).join('');
-            const dots = dotsContainer.querySelectorAll('span');
-            function showSlide(i) {
-                index = i;
-                slideContainer.style.transform = `translateX(${-i * 100}%)`;
-                dots.forEach(d => {
-                    d.classList.remove('active', 'w-4', 'bg-white');
-                    d.classList.add('bg-white/50');
+                    // Update UI Data immediately for modal
+                    document.getElementById('purchase-success-email').textContent = mailDoc.data().email || mailDoc.data().uid;
+                    document.getElementById('purchase-success-password').textContent = mailDoc.data().password;
                 });
-                dots[i].classList.add('active', 'w-4', 'bg-white');
+                
+                // Success
+                userData.balance -= cost;
+                updateUI();
+                document.getElementById('purchase-success-modal').classList.remove('hidden');
+                loadMailStore(); // Refresh stock
+            } catch(e) {
+                alert("Failed: " + e);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
             }
-            dotsContainer.addEventListener('click', e => { if(e.target.matches('span[data-index]')) showSlide(parseInt(e.target.dataset.index)); });
-            setInterval(() => showSlide((index + 1) % slides.length), 5000);
         }
         
-        async function loadFeaturesPage() {
-            try {
-                const depositQuery = query(collection(db, "deposits"), where("userId", "==", userData.tgChatId), where("status", "==", "approved"));
-                const receivedQuery = query(collection(db, "transfers"), where("toId", "==", userData.tgChatId));
-                const rechargeQuery = query(collection(db, "recharge_requests"), where("userId", "==", userData.tgChatId), where("status", "==", "approved"));
-                const sendQuery = query(collection(db, "transfers"), where("fromId", "==", userData.tgChatId));
-                
-                const [depositSnap, receivedSnap, rechargeSnap, sendSnap] = await Promise.all([getDocs(depositQuery), getDocs(receivedQuery), getDocs(rechargeQuery), getDocs(sendQuery)]);
-                
-                document.getElementById('total-deposit-display').textContent = `৳${depositSnap.docs.reduce((s, d) => s + d.data().amount, 0).toFixed(2)}`;
-                document.getElementById('total-receive-display').textContent = `৳${receivedSnap.docs.reduce((s, d) => s + d.data().amount, 0).toFixed(2)}`;
-                document.getElementById('total-recharge-display').textContent = `৳${rechargeSnap.docs.reduce((s, d) => s + d.data().amount, 0).toFixed(2)}`;
-                document.getElementById('total-send-display').textContent = `৳${sendSnap.docs.reduce((s, d) => s + d.data().amount, 0).toFixed(2)}`;
-
-                await loadTransferHistory();
-            } catch (error) {
-                showAlert("Could not load page data.");
-            }
-        }
-
-        async function loadTransferHistory() {
-            const historyList = document.getElementById('transfer-history-list');
-            historyList.innerHTML = getLoadingHTML();
-            const sentQuery = query(collection(db, "transfers"), where("fromId", "==", userData.tgChatId), orderBy("timestamp", "desc"));
-            const receivedQuery = query(collection(db, "transfers"), where("toId", "==", userData.tgChatId), orderBy("timestamp", "desc"));
+        // --- HELPER FUNCTIONS ---
+        function setupEventListeners() {
+            document.getElementById('header-balance-area').onclick = () => navigateTo('withdraw-page');
+            document.getElementById('alert-ok-btn').onclick = () => document.getElementById('custom-alert').classList.add('hidden');
             
-            try {
-                const [sentSnapshot, receivedSnapshot] = await Promise.all([getDocs(sentQuery), getDocs(receivedQuery)]);
-                const transactions = [...sentSnapshot.docs.map(d=>d.data()), ...receivedSnapshot.docs.map(d=>d.data())];
-                transactions.sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
-
-                if (transactions.length === 0) return historyList.innerHTML = '<p class="text-gray-600 text-center">No transfer history found.</p>';
-
-                historyList.innerHTML = transactions.map(item => {
-                    const isSent = item.fromId === userData.tgChatId;
-                    return `<div class="card-bg p-3 rounded-lg flex items-center justify-between"><div><p class="font-semibold text-gray-800">${isSent ? `Sent to ${item.toName}` : `Received from ${item.fromName}`}</p><p class="text-xs text-gray-500">${item.timestamp.toDate().toLocaleString('en-GB')}</p></div><p class="font-bold text-lg ${isSent ? 'text-red-600' : 'text-green-600'}">${isSent ? '-' : '+'}৳${(isSent ? item.totalDeducted : item.amount).toFixed(2)}</p></div>`;
-                }).join('');
-            } catch (e) {
-                historyList.innerHTML = '<p class="text-red-600 text-center">হিস্ট্রি লোড করা যায়নি।</p>';
-            }
-        }
-
-        function handleReceive() {
-            showAlert(`আপনার রিসিভ আইডি:\n\n${userData.tgChatId}\n\nএই আইডি ব্যবহার করে অন্য ব্যবহারকারীর থেকে ব্যালেন্স রিসিভ করতে পারবেন।`);
-            copyToClipboard(userData.tgChatId, null);
-        }
-        
-        function setupDynamicAmountHandlers(pageType) {
-            const amountInput = document.getElementById(`${pageType}-amount`);
-            const feeDisplay = document.getElementById(`${pageType}-fee-display`);
-            amountInput.addEventListener('input', () => {
-                const maxAmount = Math.floor(userData.balance / 1.05);
-                let currentAmount = parseInt(amountInput.value);
-                if (isNaN(currentAmount) || currentAmount < 0) currentAmount = 0;
-                if (currentAmount > maxAmount) amountInput.value = maxAmount;
-                feeDisplay.textContent = currentAmount > 0 ? `Fee (5%): ৳${(amountInput.value * 0.05).toFixed(2)}` : '';
-            });
-        }
-        
-        async function handleSendRequest() {
-            const recipientId = document.getElementById('send-recipient-id').value.trim();
-            const amount = parseFloat(document.getElementById('send-amount').value);
-            if (!recipientId || isNaN(amount) || amount < 20) return showAlert("অনুগ্রহ করে প্রাপকের আইডি এবং সর্বনিম্ন ৳20 পরিমাণ লিখুন।");
-            if (recipientId === userData.tgChatId) return showAlert("আপনি নিজের একাউন্টে ব্যালেন্স পাঠাতে পারবেন না।");
-
-            const totalCost = amount * 1.05;
-            if (totalCost > userData.balance) return showAlert(`আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই।`);
-            if (!confirm(`আপনি কি ${recipientId} আইডিতে ৳${amount.toFixed(2)} পাঠাতে চান?\nমোট কাটা হবে: ৳${totalCost.toFixed(2)}`)) return;
-
-            loader.style.display = 'flex';
-            const senderRef = doc(db, "users", userData.tgChatId);
-            const recipientRef = doc(db, "users", recipientId);
-
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const [senderDoc, recipientDoc] = await Promise.all([transaction.get(senderRef), transaction.get(recipientRef)]);
-                    if (!senderDoc.exists() || senderDoc.data().balance < totalCost) throw "আপনার পর্যাপ্ত ব্যালেন্স নেই।";
-                    if (!recipientDoc.exists()) throw "প্রাপক আইডি খুঁজে পাওয়া যায়নি।";
-                    transaction.update(senderRef, { balance: senderDoc.data().balance - totalCost });
-                    transaction.update(recipientRef, { balance: recipientDoc.data().balance + amount });
-                    transaction.set(doc(collection(db, "transfers")), { fromId: userData.tgChatId, fromName: userData.name, toId: recipientId, toName: recipientDoc.data().name, amount: amount, fee: amount * 0.05, totalDeducted: totalCost, timestamp: serverTimestamp() });
+            // Withdraw Logic
+            document.getElementById('submit-withdraw-btn').onclick = async () => {
+                const amount = Number(document.getElementById('withdraw-amount').value);
+                const method = document.getElementById('withdraw-method').value;
+                const number = document.getElementById('withdraw-number').value;
+                
+                if(amount < 100 || !number) return alert("Invalid details. Min 100 BDT.");
+                if(userData.balance < amount) return alert("Insufficient Balance.");
+                
+                await addDoc(collection(db, "withdrawals"), {
+                    userId: userData.tgChatId, amount, method, number, status: 'pending', requestedAt: serverTimestamp()
                 });
-                userData.balance -= totalCost;
+                await updateDoc(doc(db, "users", userData.tgChatId), { balance: increment(-amount) });
+                userData.balance -= amount;
                 updateUI();
-                showAlert(`সফলভাবে ৳${amount.toFixed(2)} পাঠানো হয়েছে।`);
-                navigateTo('features-page');
-            } catch (error) { showAlert(typeof error === 'string' ? error : "ব্যালেন্স পাঠাতে সমস্যা হয়েছে।"); } 
-            finally { loader.style.display = 'none'; }
-        }
-        
-        async function handleRechargeRequest() {
-            const number = document.getElementById('recharge-number').value.trim();
-            const amount = parseFloat(document.getElementById('recharge-amount').value);
-            const operator = document.getElementById('recharge-operator').value;
-            if (!/^(01[3-9])\d{8}$/.test(number) || isNaN(amount) || amount < 20 || !operator) return showAlert("অনুগ্রহ করে সমস্ত তথ্য সঠিকভাবে পূরণ করুন।");
+                alert("Withdraw request submitted.");
+                loadWithdrawHistory();
+            };
 
-            const totalCost = amount * 1.05;
-            if (totalCost > userData.balance) return showAlert(`আপনার অ্যাকাউন্টে পর্যাপ্ত ব্যালেন্স নেই।`);
-            if (!confirm(`আপনি কি ${number} নম্বরে ৳${amount.toFixed(2)} রিচার্জ করতে চান?\nমোট কাটা হবে: ৳${totalCost.toFixed(2)}`)) return;
-
-            loader.style.display = 'flex';
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const userRef = doc(db, "users", userData.tgChatId);
-                    const userDoc = await transaction.get(userRef);
-                    if (!userDoc.exists() || userDoc.data().balance < totalCost) throw "আপনার পর্যাপ্ত ব্যালেন্স নেই।";
-                    transaction.update(userRef, { balance: userDoc.data().balance - totalCost });
-                    transaction.set(doc(collection(db, "recharge_requests")), { userId: userData.tgChatId, userName: userData.name, mobileNumber: number, amount: amount, operator: operator, rechargeType: document.getElementById('recharge-type').value, fee: amount * 0.05, totalDeducted: totalCost, status: "pending", requestedAt: serverTimestamp() });
-                });
-                userData.balance -= totalCost;
-                updateUI();
-                showAlert("আপনার রিচার্জ অনুরোধ সফলভাবে জমা হয়েছে।");
-                loadRechargeHistory();
-            } catch (error) { showAlert(typeof error === 'string' ? error : "রিচার্জ অনুরোধে সমস্যা হয়েছে।"); } 
-            finally { loader.style.display = 'none'; }
-        }
-        
-        async function loadRechargeHistory() {
-            const historyList = document.getElementById('recharge-history-list');
-            historyList.innerHTML = getLoadingHTML();
-            try {
-                const q = query(collection(db, "recharge_requests"), where("userId", "==", userData.tgChatId), orderBy("requestedAt", "desc"));
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) return historyList.innerHTML = '<p class="text-gray-600 text-center">কোনো রিচার্জ হিস্ট্রি পাওয়া যায়নি।</p>';
-
-                historyList.innerHTML = snapshot.docs.map(doc => {
-                    const item = doc.data();
-                    let statusColor, statusIcon;
-                    switch (item.status) {
-                        case 'approved': statusColor = 'text-green-600'; statusIcon = 'check-circle-2'; break;
-                        case 'rejected': statusColor = 'text-red-600'; statusIcon = 'x-circle'; break;
-                        default: statusColor = 'text-yellow-600'; statusIcon = 'hourglass';
+            // Admin Logic (Simplified for brevity)
+            document.getElementById('add-mails-btn').onclick = async () => {
+                const type = document.getElementById('mail-type-select').value;
+                const data = document.getElementById('mail-data-textarea').value;
+                const lines = data.split('\n');
+                const batch = writeBatch(db);
+                lines.forEach(l => {
+                    const p = l.split('/'); // format: email/pass
+                    if(p.length >= 2) {
+                        const ref = doc(collection(db, type));
+                        batch.set(ref, { email: p[0], password: p[1], isSold: false, createdAt: serverTimestamp() });
                     }
-                    return `<div class="card-bg p-3 rounded-lg flex items-center justify-between"><div class="flex items-center gap-3"><i data-lucide="${statusIcon}" class="w-6 h-6 ${statusColor}"></i><div><p class="font-semibold text-gray-800">${item.mobileNumber}</p><p class="text-xs text-gray-500">${item.operator} - ${item.requestedAt.toDate().toLocaleDateString('en-GB')}</p></div></div><div class="text-right"><p class="font-bold text-lg text-gray-800">৳${item.amount.toFixed(2)}</p><p class="font-semibold ${statusColor} capitalize text-xs">${item.status}</p></div></div>`;
-                }).join('');
-                lucide.createIcons();
-            } catch (error) { historyList.innerHTML = '<p class="text-red-600 text-center">হিস্ট্রি লোড করা যায়নি।</p>'; }
+                });
+                await batch.commit();
+                alert("Added!");
+            };
         }
 
-        async function loadTutorials() {
-            const listEl = document.getElementById('tutorial-list');
-            listEl.innerHTML = getLoadingHTML();
-            try {
-                const q = query(collection(db, "tutorials"), orderBy("order"));
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) return listEl.innerHTML = '<p class="text-center text-gray-600">কোনো টিউটোরিয়াল পাওয়া যায়নি।</p>';
-                listEl.innerHTML = snapshot.docs.map(doc => {
-                    const t = doc.data();
-                    return `<div class="card-bg p-4"><h3 class="font-bold text-lg text-gray-800 mb-3">${t.title}</h3><div class="relative pt-[56.25%] h-0 overflow-hidden rounded-lg bg-gray-200"><iframe class="absolute top-0 left-0 w-full h-full" src="${t.youtubeEmbedUrl}" title="${t.title}" frameborder="0" allowfullscreen></iframe></div></div>`;
-                }).join('');
-            } catch (e) { listEl.innerHTML = '<p class="text-center text-red-600">টিউটোরিয়াল লোড করা যায়নি।</p>'; }
+        window.copyToClipboard = (text, el, msg) => {
+            navigator.clipboard.writeText(text);
+            alert(msg || "Copied!");
         }
 
-        async function loadReviews() {
-            const listEl = document.getElementById('reviews-list');
-            listEl.innerHTML = getLoadingHTML();
-            try {
-                const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(5));
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) return listEl.innerHTML = '<p class="text-center text-gray-600">কোনো রিভিউ পাওয়া যায়নি।</p>';
-                listEl.innerHTML = snapshot.docs.map(doc => {
-                    const r = doc.data();
-                    let stars = Array(5).fill(0).map((_, i) => `<i data-lucide="star" class="w-4 h-4 ${i < r.rating ? 'fill-current text-amber-400' : 'text-gray-300'}"></i>`).join('');
-                    return `<div class="bg-white/80 p-4 rounded-lg border border-gray-200"><div class="flex items-start gap-4"><img src="${r.imageUrl}" class="w-12 h-12 rounded-full object-cover" alt="User"><div class="flex-1"><div class="flex justify-between items-center"><h5 class="font-bold">${r.name}</h5><div class="flex text-sm">${stars}</div></div><p class="text-gray-600 text-sm mt-1">"${r.reviewText}"</p></div></div></div>`;
-                }).join('');
-                lucide.createIcons();
-            } catch (e) { listEl.innerHTML = '<p class="text-center text-red-600">রিভিউ লোড করা যায়নি।</p>'; }
+        // Functions for Earn/Admin/Withdraw/Profile... (Keep implementation similar to previous or simplified)
+        async function loadProfilePage() {
+             document.getElementById('profile-name').textContent = userData.name;
+             document.getElementById('profile-id').textContent = "ID: " + userData.tgChatId;
+             // Pic logic...
+             if(userData.username) document.getElementById('profile-initials').textContent = userData.name[0];
+        }
+
+        async function populateAdminMailTypes() {
+            const s = document.getElementById('mail-type-select');
+            s.innerHTML = '';
+            (appConfig.mails || []).forEach(m => {
+                s.innerHTML += `<option value="${m.stockKey}">${m.type}</option>`;
+            });
         }
         
-        function handleFeaturesClick() {
-            if (userData.featuresLockedUntil && userData.featuresLockedUntil.toDate() > new Date()) {
-                const unlockTime = userData.featuresLockedUntil.toDate().toLocaleTimeString('en-US');
-                return showAlert(`⚠️ আপনি একাধিকবার ভুল পিন দেওয়ার কারণে আপনার একাউন্ট সাময়িকভাবে স্থগিত করা হয়েছে।\n🔒 ${unlockTime} পর আবার চেষ্টা করুন।`);
-            }
-            document.getElementById(userData.pin ? 'pin-enter-modal' : 'pin-set-modal').classList.remove('hidden');
+        // SELL FUNCTIONS
+        window.openInstagramSell = () => {
+            document.getElementById('insta-rate-display').textContent = `Rate: ৳${appConfig.instagramRate || 0}`;
+            document.getElementById('instagram-sell-modal').classList.remove('hidden');
+        }
+        window.handleInstagramSubmit = async () => {
+            const username = document.getElementById('insta-username').value;
+            // validation...
+            await addDoc(collection(db, "earn_requests"), {
+                userId: userData.tgChatId, type: 'instagram', data: { username }, status: 'pending', estimatedValue: appConfig.instagramRate || 0, timestamp: serverTimestamp()
+            });
+            alert("Submitted!");
+            document.getElementById('instagram-sell-modal').classList.add('hidden');
+        }
+        window.openNavalSell = () => {
+            document.getElementById('naval-target-id').textContent = appConfig.navalCoinTargetId || "ID: 123456";
+            document.getElementById('naval-sell-modal').classList.remove('hidden');
+        }
+        window.handleNavalSubmit = async () => {
+             const amt = Number(document.getElementById('naval-amount').value);
+             const val = (amt/1000) * (appConfig.navalCoinRate || 10);
+             await addDoc(collection(db, "earn_requests"), {
+                userId: userData.tgChatId, type: 'naval_coin', data: { amount: amt }, status: 'pending', estimatedValue: val, timestamp: serverTimestamp()
+            });
+            alert("Submitted!");
+            document.getElementById('naval-sell-modal').classList.add('hidden');
         }
 
-        async function handleSetPin() {
-            const pin = document.getElementById('set-pin').value;
-            const confirmPin = document.getElementById('confirm-pin').value;
-            if (!/^\d{4}$/.test(pin)) return showAlert("⚠️ পিন অবশ্যই ৪ সংখ্যার হতে হবে।");
-            if (pin !== confirmPin) return showAlert("⚠️ PIN does not match.");
-            
-            loader.style.display = 'flex';
-            try {
-                await updateDoc(doc(db, "users", userData.tgChatId), { pin: pin });
-                userData.pin = pin;
-                document.getElementById('pin-set-modal').classList.add('hidden');
-                showAlert("আপনার পিন সফলভাবে সেট করা হয়েছে!");
-                navigateTo('features-page');
-            } catch (e) { showAlert("পিন সেট করতে সমস্যা হয়েছে।"); } 
-            finally { loader.style.display = 'none'; }
+        async function loadWithdrawHistory() {
+             // Implementation...
+             const el = document.getElementById('withdraw-history-list');
+             el.innerHTML = "Loading...";
+             const q = query(collection(db, "withdrawals"), where("userId", "==", userData.tgChatId), orderBy("requestedAt", "desc"), limit(5));
+             const snap = await getDocs(q);
+             el.innerHTML = snap.docs.map(d => `<div class="bg-gray-100 p-2 rounded text-xs flex justify-between"><span>${d.data().method}</span><span>${d.data().status}</span></div>`).join('');
+        }
+        
+        async function loadEarnRequests() {
+             // Admin earn list implementation...
+             const el = document.getElementById('earn-requests-list');
+             const q = query(collection(db, "earn_requests"), where("status", "==", "pending"));
+             const snap = await getDocs(q);
+             el.innerHTML = snap.docs.map(d => {
+                 const data = d.data();
+                 return `<div class="border p-2 rounded">
+                    <p class="font-bold">${data.type}</p>
+                    <p>Val: ${data.estimatedValue}</p>
+                    <button onclick="approveEarn('${d.id}', '${data.userId}', ${data.estimatedValue})" class="bg-green-500 text-white p-1 text-xs">Approve</button>
+                 </div>`;
+             }).join('');
         }
 
-        async function handleEnterPin() {
-            const enteredPin = document.getElementById('enter-pin').value;
-            const userRef = doc(db, "users", userData.tgChatId);
-
-            if (enteredPin === userData.pin) {
-                if (userData.pinFailAttempts?.length > 0) await updateDoc(userRef, { pinFailAttempts: [] });
-                document.getElementById('pin-enter-modal').classList.add('hidden');
-                navigateTo('features-page');
-            } else {
-                const now = Timestamp.now();
-                const fiveMinutesAgo = new Date(now.toDate().getTime() - 5 * 60 * 1000);
-                let recentFails = (userData.pinFailAttempts || []).map(t => t.toDate()).filter(t => t > fiveMinutesAgo);
-                recentFails.push(now.toDate());
-                
-                if (recentFails.length >= 3) {
-                    const lockTimestamp = Timestamp.fromDate(new Date(now.toDate().getTime() + 10 * 60 * 60 * 1000));
-                    await updateDoc(userRef, { pinFailAttempts: [], featuresLockedUntil: lockTimestamp });
-                    document.getElementById('pin-enter-modal').classList.add('hidden');
-                    showAlert("আপনি ৩ বার ভুল পিন দিয়েছেন। আপনার একাউন্ট ১০ ঘণ্টার জন্য লক করা হয়েছে।");
-                } else {
-                    await updateDoc(userRef, { pinFailAttempts: recentFails.map(d => Timestamp.fromDate(d)) });
-                    showAlert(`⚠️ ভুল PIN। আর ${3 - recentFails.length} বার ভুল করলে অ্যাকাউন্ট লক হবে।`);
-                }
-            }
+        window.approveEarn = async (did, uid, val) => {
+            await updateDoc(doc(db, "earn_requests", did), { status: 'approved' });
+            await updateDoc(doc(db, "users", uid), { balance: increment(val) });
+            alert("Approved");
+            loadEarnRequests();
         }
+
     </script>
 </body>
 </html>
